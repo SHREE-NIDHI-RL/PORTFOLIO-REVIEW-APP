@@ -1,5 +1,6 @@
 import { useState, useContext } from "react"
 import { AuthContext } from "../context/AuthContext"
+import { useNavigate } from "react-router-dom"
 
 function Register() {
   // Step 2: All state variables
@@ -10,27 +11,29 @@ function Register() {
   const [qualifications, setQualifications] = useState("")
   const [workplace, setWorkplace] = useState("")
   const [skills, setSkills] = useState("")
+  const navigate = useNavigate()
+
 
   // Step 4: useContext to get login function
   const { login } = useContext(AuthContext)
 
-  // Step 4: Form submit handler
   const handleSubmit = (e) => {
-    e.preventDefault()
+  e.preventDefault()
 
-    const userData = {
-      name,
-      email,
-      role,
-      qualifications: role === "reviewer" ? qualifications : null,
-      workplace: role === "reviewer" ? workplace : null,
-      skills: role === "reviewer" ? skills : null,
-    }
-
-    login(userData)
-    // Optional: redirect to dashboard later
-    console.log(userData)
+  const userData = {
+    name,
+    email,
+    role,
+    qualifications: role === "reviewer" ? qualifications : null,
+    workplace: role === "reviewer" ? workplace : null,
+    skills: role === "reviewer" ? skills : null,
   }
+
+  login(userData)
+
+  navigate("/dashboard")
+}
+
 
   // Step 3: JSX return
   return (
