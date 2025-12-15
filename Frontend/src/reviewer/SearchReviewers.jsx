@@ -1,22 +1,8 @@
-import { useState } from "react"
+import { useState, useContext } from "react"
+import { ReviewerContext } from "../context/ReviewerContext"
 
 function SearchReviewers() {
-  const reviewers = [
-    {
-      id: 1,
-      name: "Anita",
-      skills: "Frontend",
-      workplace: "Google",
-      credibility: 82
-    },
-    {
-      id: 2,
-      name: "Rahul",
-      skills: "Backend",
-      workplace: "Amazon",
-      credibility: 75
-    }
-  ]
+  const { reviewers } = useContext(ReviewerContext)
 
   const [query, setQuery] = useState("")
   const [sentRequests, setSentRequests] = useState([])

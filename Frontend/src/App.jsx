@@ -10,6 +10,10 @@ import CreatePortfolio from "./portfolio/CreatePortfolio"
 import SubmitReview from "./review/SubmitReview"
 import SearchReviewers from "./reviewer/SearchReviewers"
 import ReviewRequests from "./reviewer/ReviewRequests"
+import Home from "./pages/Home"
+import SubmitPortfolio from "./portfolio/SubmitPortfolio"
+import SavedPortfolios from "./portfolio/SavedPortfolios"
+
 
 
 
@@ -19,7 +23,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<h1>Home</h1>} />
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<ProtectedRoute>  {user?.role === "owner" ? <OwnerDashboard /> : <ReviewerDashboard />}  </ProtectedRoute> }/>
@@ -27,6 +31,9 @@ function App() {
         <Route path="/submit-review" element={  <ProtectedRoute>  <SubmitReview /></ProtectedRoute>}/>
         <Route path="/search-reviewers" element={ <ProtectedRoute> <SearchReviewers /></ProtectedRoute> }/>
         <Route path="/review-requests" element={ <ProtectedRoute> <ReviewRequests /></ProtectedRoute> }/>
+        <Route path="/submit-portfolio" element={ <ProtectedRoute> <SubmitPortfolio /></ProtectedRoute> }/>
+        <Route path="/saved-portfolios" element={ <ProtectedRoute> <SavedPortfolios /></ProtectedRoute> }/>
+
         </Routes>
     </BrowserRouter>
   )

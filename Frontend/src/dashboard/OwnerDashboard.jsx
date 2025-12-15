@@ -15,11 +15,11 @@ function OwnerDashboard() {
       <h3>Your Capabilities</h3>
       <ul>
         <Link to="/create-portfolio">Create Portfolio</Link>
-        <li>Submit Portfolio for Review</li>
+        <Link to="/submit-portfolio">Submit Portfolio for Review</Link>
         <Link to="/search-reviewers">Find Reviewers</Link>
         <li>Request Specific Reviewers</li>
         <li>View Reviews & Scores</li>
-        <li>Control Portfolio Visibility</li>
+        <Link to="/saved-portfolios">Saved Portfolios</Link>
       </ul>
     </div>
   )

@@ -1,0 +1,31 @@
+.home-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background: linear-gradient(135deg, #0f172a, #020617);
+  color: #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.home-container:hover {
+  transform: scale(1.02);
+}
+
+.home-active {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.home-title {
+  font-size: 3rem;
+  letter-spacing: 1px;
+}
+
+.home-subtitle {
+  margin-top: 10px;
+  font-size: 1rem;
+  opacity: 0.7;
+}
