@@ -2,6 +2,7 @@ import { useContext } from "react"
 import { AuthContext } from "../context/AuthContext"
 import { Link } from "react-router-dom"
 
+
 function OwnerDashboard() {
   const { user } = useContext(AuthContext)
 
@@ -15,6 +16,7 @@ function OwnerDashboard() {
       <ul>
         <Link to="/create-portfolio">Create Portfolio</Link>
         <li>Submit Portfolio for Review</li>
+        <Link to="/search-reviewers">Find Reviewers</Link>
         <li>Request Specific Reviewers</li>
         <li>View Reviews & Scores</li>
         <li>Control Portfolio Visibility</li>

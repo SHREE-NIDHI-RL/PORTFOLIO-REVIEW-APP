@@ -8,6 +8,8 @@ import { useContext } from "react"
 import { AuthContext } from "./context/AuthContext"
 import CreatePortfolio from "./portfolio/CreatePortfolio"
 import SubmitReview from "./review/SubmitReview"
+import SearchReviewers from "./reviewer/SearchReviewers"
+import ReviewRequests from "./reviewer/ReviewRequests"
 
 
 
@@ -22,10 +24,10 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<ProtectedRoute>  {user?.role === "owner" ? <OwnerDashboard /> : <ReviewerDashboard />}  </ProtectedRoute> }/>
         <Route path="/create-portfolio" element={<ProtectedRoute>   <CreatePortfolio /> </ProtectedRoute> }/>
-        <Route
-  path="/submit-review"
-  element={  <ProtectedRoute>  <SubmitReview /></ProtectedRoute>}/>
- </Routes>
+        <Route path="/submit-review" element={  <ProtectedRoute>  <SubmitReview /></ProtectedRoute>}/>
+        <Route path="/search-reviewers" element={ <ProtectedRoute> <SearchReviewers /></ProtectedRoute> }/>
+        <Route path="/review-requests" element={ <ProtectedRoute> <ReviewRequests /></ProtectedRoute> }/>
+        </Routes>
     </BrowserRouter>
   )
 }
