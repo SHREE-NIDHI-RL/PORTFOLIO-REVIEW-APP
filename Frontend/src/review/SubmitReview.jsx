@@ -1,5 +1,6 @@
 import { useState, useContext } from "react"
 import { AuthContext } from "../context/AuthContext"
+import ReviewerNavbar from "../components/ReviewerNavbar"
 
 function SubmitReview() {
   const { user } = useContext(AuthContext)
@@ -26,8 +27,11 @@ function SubmitReview() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Submit Review</h2>
+    <div className="dashboard-with-navbar">
+      <ReviewerNavbar />
+      <div>
+        <form onSubmit={handleSubmit}>
+          <h2>Submit Review</h2>
 
       <label>Score (0–10)</label>
       <input
@@ -44,8 +48,10 @@ function SubmitReview() {
         onChange={(e) => setFeedback(e.target.value)}
       />
 
-      <button type="submit">Submit Review</button>
-    </form>
+          <button type="submit">Submit Review</button>
+        </form>
+      </div>
+    </div>
   )
 }
 

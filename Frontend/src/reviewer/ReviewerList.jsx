@@ -1,3 +1,5 @@
+import ReviewerNavbar from "../components/ReviewerNavbar"
+
 function ReviewerList() {
   const reviewers = [
     { name: "Anita", skills: "Frontend", workplace: "Google" },
@@ -5,8 +7,10 @@ function ReviewerList() {
   ]
 
   return (
-    <div>
-      <h2>Available Reviewers</h2>
+    <div className="dashboard-with-navbar">
+      <ReviewerNavbar />
+      <div>
+        <h2>Available Reviewers</h2>
       {reviewers.map((r, index) => (
         <div key={index}>
           <p>{r.name}</p>
@@ -15,6 +19,7 @@ function ReviewerList() {
           <button>Request Review</button>
         </div>
       ))}
+      </div>
     </div>
   )
 }

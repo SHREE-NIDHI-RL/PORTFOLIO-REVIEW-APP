@@ -1,31 +1,75 @@
 import { useContext } from "react"
 import { AuthContext } from "../context/AuthContext"
 import { Link } from "react-router-dom"
+import ReviewerNavbar from "../components/ReviewerNavbar"
+import "../styles/ReviewerDashboard.css"
 
 function ReviewerDashboard() {
   const { user } = useContext(AuthContext)
 
+  const reviewerActions = [
+    {
+      title: "Review Requests",
+      link: "/review-requests",
+      description: "View and manage incoming portfolio review requests"
+    },
+    {
+      title: "Submit Review",
+      link: "/submit-review", 
+      description: "Provide detailed feedback and scores for portfolios"
+    },
+    {
+      title: "My Profile",
+      link: "/reviewer-profile",
+      description: "Manage your professional reviewer profile and credentials"
+    },
+    {
+      title: "Credibility Score",
+      link: "/credibility-score",
+      description: "Track your reviewer reputation and performance metrics"
+    }
+  ]
+
   return (
-    <div>
-      <h2>Reviewer Dashboard</h2>
+    <>
+      <ReviewerNavbar />
+      <div className="dashboard-with-navbar">
+        <div className="reviewer-dashboard-wrapper">
+          <div className="reviewer-dashboard-main">
+            <div className="reviewer-dashboard-header">
+              <h1 className="reviewer-dashboard-title">Review Hub</h1>
+              <div className="reviewer-info">
+                <div className="reviewer-detail">
+                  <strong>{user?.name}</strong>
+                </div>
+                <div className="reviewer-detail">
+                  {user?.qualifications}
+                </div>
+                <div className="reviewer-detail">
+                  {user?.workplace}
+                </div>
+              </div>
+            </div>
 
-      <div>
-        <p><strong>Name:</strong> {user?.name}</p>
-        <p><strong>Qualifications:</strong> {user?.qualifications}</p>
-        <p><strong>Workplace:</strong> {user?.workplace}</p>
+            <div className="reviewer-actions-section">
+              <h2 className="reviewer-actions-title">Reviewer Actions</h2>
+              <ul className="reviewer-actions-grid">
+                {reviewerActions.map((action, index) => (
+                  <li key={index} className="reviewer-action-card">
+                    <Link to={action.link} className="capability-link">
+                      {action.title}
+                    </Link>
+                    <p className="capability-description">
+                      {action.description}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <h3>Reviewer Actions</h3>
-      <ul>
-        <li>Search Portfolios for Review</li>
-        <li> <Link to="/submit-review">Review a Portfolio</Link></li>
-        <li><Link to="/review-requests">Review Requests</Link></li>
-        <li>Accept / Reject Review Requests</li>
-        <li>Give Scores (0–10)</li>
-        <li>Provide Structured Feedback</li>
-        <li>Build Reviewer Credibility</li>
-      </ul>
-    </div>
+    </>
   )
 }
 

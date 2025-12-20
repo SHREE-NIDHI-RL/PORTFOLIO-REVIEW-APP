@@ -1,4 +1,5 @@
 import { useState } from "react"
+import ReviewerNavbar from "../components/ReviewerNavbar"
 
 function ReviewRequests() {
   const [requests, setRequests] = useState([
@@ -20,8 +21,10 @@ function ReviewRequests() {
   }
 
   return (
-    <div>
-      <h2>Review Requests</h2>
+    <div className="dashboard-with-navbar">
+      <ReviewerNavbar />
+      <div>
+        <h2>Review Requests</h2>
 
       {requests.map((req) => (
         <div key={req.requestId}>
@@ -36,6 +39,7 @@ function ReviewRequests() {
           )}
         </div>
       ))}
+      </div>
     </div>
   )
 }
