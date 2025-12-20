@@ -1,10 +1,40 @@
-import { useContext } from "react"
+import { useContext, useState } from "react"
 import { ReviewerContext } from "../context/ReviewerContext"
+import { PortfolioContext } from "../context/PortfolioContext"
+import { AuthContext } from "../context/AuthContext"
 import OwnerNavbar from "../components/OwnerNavbar"
 import "../styles/FindReviewer.css"
 
 function FindReviewer() {
   const { reviewers } = useContext(ReviewerContext)
+  const { portfolios, addReviewRequest } = useContext(PortfolioContext)
+  const { user } = useContext(AuthContext)
+  const [selectedReviewer, setSelectedReviewer] = useState(null)
+  const [selectedPortfolio, setSelectedPortfolio] = useState("")
+
+  const handleSendRequest = (reviewer) => {
+    if (!selectedPortfolio) {
+      alert("Please select a portfolio first")
+      return
+    }
+    
+    const portfolio = portfolios.find(p => p.title === selectedPortfolio)
+    const requestData = {
+      reviewerEmail: reviewer.email,
+      reviewerName: reviewer.name,
+      ownerEmail: user.email,
+      ownerName: user.name || "Portfolio Owner",
+      portfolioTitle: portfolio.title,
+      portfolioContent: portfolio.content,
+      status: "pending",
+      requestDate: new Date().toISOString()
+    }
+    
+    addReviewRequest(requestData)
+    alert(`Portfolio request sent to ${reviewer.name}!`)
+    setSelectedReviewer(null)
+    setSelectedPortfolio("")
+  }
 
   return (
     <div className="dashboard-with-navbar">
@@ -44,14 +74,49 @@ function FindReviewer() {
                       <span className="detail-value">{reviewer.skills}</span>
                     </div>
                   </div>
-                  <button className="contact-reviewer-btn">
-                    Contact Reviewer
+                  <button 
+                    className="send-request-btn"
+                    onClick={() => setSelectedReviewer(reviewer)}
+                  >
+                    Send Portfolio Request
                   </button>
                 </div>
               </div>
             ))
           )}
         </div>
+        
+        {selectedReviewer && (
+          <div className="request-modal">
+            <div className="modal-content">
+              <h3>Send Portfolio to {selectedReviewer.name}</h3>
+              <select 
+                value={selectedPortfolio} 
+                onChange={(e) => setSelectedPortfolio(e.target.value)}
+                className="portfolio-select"
+              >
+                <option value="">Select a portfolio</option>
+                {portfolios.filter(p => p.owner === user.email).map((portfolio, index) => (
+                  <option key={index} value={portfolio.title}>{portfolio.title}</option>
+                ))}
+              </select>
+              <div className="modal-buttons">
+                <button 
+                  onClick={() => handleSendRequest(selectedReviewer)}
+                  className="send-btn"
+                >
+                  Send Request
+                </button>
+                <button 
+                  onClick={() => setSelectedReviewer(null)}
+                  className="cancel-btn"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

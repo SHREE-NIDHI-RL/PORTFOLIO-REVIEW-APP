@@ -4,11 +4,14 @@
   background: #334155;
   color: white;
   position: fixed;
-  left: 0;
-  top: 0;
+  left: 20px;
+  top: 20px;
+  bottom: 20px;
   display: flex;
   flex-direction: column;
   z-index: 1000;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
 .navbar-header {
@@ -137,19 +140,31 @@
 }
 
 .dashboard-with-navbar {
-  margin-left: 280px;
-  min-height: 100vh;
+  margin-left: 320px;
+  margin-right: 20px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  min-height: calc(100vh - 40px);
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
 }
 
 @media (max-width: 768px) {
   .navbar-container {
-    width: 100%;
+    width: calc(100% - 40px);
     height: auto;
     position: relative;
+    left: 20px;
+    top: 20px;
+    bottom: auto;
+    margin-bottom: 20px;
   }
   
   .dashboard-with-navbar {
-    margin-left: 0;
+    margin-left: 20px;
+    margin-top: 0;
   }
   
   .navbar-nav {

@@ -2,6 +2,7 @@ import { useContext } from "react"
 import { AuthContext } from "../context/AuthContext"
 import { Link } from "react-router-dom"
 import OwnerNavbar from "../components/OwnerNavbar"
+import UserProfile from "../components/UserProfile"
 import "../styles/OwnerDashboard.css"
 
 function OwnerDashboard() {
@@ -61,6 +62,7 @@ function OwnerDashboard() {
   return (
     <>
       <OwnerNavbar />
+      <UserProfile />
       <div className="dashboard-with-navbar">
         <div className="owner-dashboard">
           <div className="dashboard-header">

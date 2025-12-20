@@ -2,11 +2,13 @@ import { useContext, useState } from "react"
 import { PortfolioContext } from "../context/PortfolioContext"
 import { AuthContext } from "../context/AuthContext"
 import OwnerNavbar from "../components/OwnerNavbar"
+import { useNavigate } from "react-router-dom"
 import "../styles/SavedPortfolios.css"
 
 function SavedPortfolios() {
   const { portfolios, addPortfolio, addVersion } = useContext(PortfolioContext)
   const { user } = useContext(AuthContext)
+  const navigate = useNavigate()
   const [showUpload, setShowUpload] = useState(false)
   const [uploadTitle, setUploadTitle] = useState("")
   const [uploadFiles, setUploadFiles] = useState(null)
@@ -16,6 +18,10 @@ function SavedPortfolios() {
   const [versionType, setVersionType] = useState("text")
 
   const userPortfolios = portfolios.filter(p => p.owner === user?.email)
+
+  const handleViewVersions = (portfolio) => {
+    navigate('/portfolio-versions', { state: { portfolio } })
+  }
 
   const handleFileUpload = (e) => {
     e.preventDefault()
@@ -47,6 +53,9 @@ function SavedPortfolios() {
       <div className="saved-portfolios-container">
         <div className="saved-portfolios-header">
           <h2 className="saved-portfolios-title">Saved Portfolios</h2>
+          <div className="demo-note">
+            <p>💾 Demo Data: 4 sample portfolios with multiple versions for testing</p>
+          </div>
         </div>
         
         <button 
@@ -97,12 +106,20 @@ function SavedPortfolios() {
                     <span className="version-badge">v{portfolio.versions ? portfolio.versions.length : 1}</span>
                     <span className="date-text">{new Date(portfolio.createdAt).toLocaleDateString()}</span>
                   </div>
-                  <button 
-                    onClick={() => setSelectedPortfolio(portfolio)} 
-                    className="add-version-btn"
-                  >
-                    Add Version
-                  </button>
+                  <div className="portfolio-actions">
+                    <button 
+                      onClick={() => handleViewVersions(portfolio)} 
+                      className="view-versions-btn"
+                    >
+                      View Versions
+                    </button>
+                    <button 
+                      onClick={() => setSelectedPortfolio(portfolio)} 
+                      className="add-version-btn"
+                    >
+                      Add Version
+                    </button>
+                  </div>
                 </div>
               )
             })}

@@ -109,3 +109,106 @@
 .reviewer-action-card:hover::before {
   transform: scaleX(1);
 }
+
+.pending-requests-section {
+  padding: 2.5rem;
+  border-top: 2px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.pending-requests-title {
+  font-size: 1.8rem;
+  color: #0f172a;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.requests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.request-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 2px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.request-card:hover {
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.request-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.request-header h3 {
+  color: #0f172a;
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.request-date {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.request-details h4 {
+  color: #3b82f6;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.portfolio-preview {
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.request-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.accept-btn {
+  flex: 1;
+  padding: 0.75rem;
+  background: #059669;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.accept-btn:hover {
+  background: #047857;
+  transform: translateY(-1px);
+}
+
+.reject-btn {
+  flex: 1;
+  padding: 0.75rem;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.reject-btn:hover {
+  background: #b91c1c;
+  transform: translateY(-1px);
+}

@@ -3,7 +3,11 @@ import { createContext, useState } from "react"
 export const AuthContext = createContext()
 
 function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState({
+    name: "John Smith",
+    email: "owner@example.com",
+    role: "owner"
+  })
 
   const login = (userData) => {
     setUser(userData)

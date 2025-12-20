@@ -17,8 +17,10 @@ function OwnerNavbar() {
   const navItems = [
     { path: "/dashboard", icon: "📊", label: "Dashboard" },
     { path: "/create-portfolio", icon: "📁", label: "Create Portfolio" },
+    { path: "/saved-portfolios", icon: "💾", label: "Saved Portfolios" },
+    { path: "/posts", icon: "📱", label: "Posts" },
     { path: "/find-reviewer", icon: "🔍", label: "Find a Reviewer" },
-    { path: "/feedback", icon: "💬", label: "Feedback" },
+    { path: "/view-feedback", icon: "💬", label: "View Feedback" },
     { path: "/settings", icon: "⚙️", label: "Settings" }
   ]
 
@@ -37,21 +39,6 @@ function OwnerNavbar() {
           </Link>
         ))}
       </nav>
-
-      <div className="user-profile-section">
-        <div className="user-profile-card">
-          <div className="user-profile-avatar">
-            {user?.name?.charAt(0) || 'S'}
-          </div>
-          <div className="user-profile-info">
-            <h4 className="user-profile-name">Shree Murugan</h4>
-            <p className="user-profile-role">Owner</p>
-          </div>
-        </div>
-        <button onClick={handleLogout} className="logout-button">
-          Log Out
-        </button>
-      </div>
     </div>
   )
 }
