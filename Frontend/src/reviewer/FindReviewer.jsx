@@ -27,7 +27,12 @@ function FindReviewer() {
       portfolioTitle: portfolio.title,
       portfolioContent: portfolio.content,
       status: "pending",
-      requestDate: new Date().toISOString()
+      requestDate: new Date().toISOString(),
+      ownerProfile: {
+        name: user.name || "Portfolio Owner",
+        email: user.email,
+        role: user.role
+      }
     }
     
     addReviewRequest(requestData)

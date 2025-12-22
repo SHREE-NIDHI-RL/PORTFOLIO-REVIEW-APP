@@ -18,17 +18,12 @@ import PortfolioVersions from "./portfolio/PortfolioVersions"
 import ViewReviews from "./review/ViewReviews"
 import ViewFeedback from "./review/ViewFeedback"
 import Posts from "./review/Posts"
-import DemoControls from "./components/DemoControls"
-
-
-
 
 function App() {
   const { user } = useContext(AuthContext)
 
   return (
     <BrowserRouter>
-      <DemoControls />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
@@ -45,7 +40,6 @@ function App() {
         <Route path="/portfolio-versions" element={ <ProtectedRoute> <PortfolioVersions /></ProtectedRoute> }/>
         <Route path="/view-reviews" element={ <ProtectedRoute> <ViewReviews /></ProtectedRoute> }/>
         <Route path="/view-feedback" element={ <ProtectedRoute> <ViewFeedback /></ProtectedRoute> }/>
-
         </Routes>
     </BrowserRouter>
   )

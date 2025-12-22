@@ -241,9 +241,27 @@ function PortfolioProvider({ children }) {
   const addReviewRequest = (request) => {
     const newRequest = {
       ...request,
-      id: Date.now()
+      id: Date.now(),
+      ownerProfile: {
+        name: request.ownerName,
+        email: request.ownerEmail
+      }
     }
     setReviewRequests([...reviewRequests, newRequest])
+  }
+
+  const submitReview = (requestId, reviewData) => {
+    setReviewRequests(reviewRequests.map(req => 
+      req.id === requestId 
+        ? { 
+            ...req, 
+            status: "completed", 
+            reviewDate: new Date().toISOString(),
+            score: reviewData.score,
+            feedback: reviewData.feedback
+          } 
+        : req
+    ))
   }
 
   const addPost = (postData) => {
@@ -272,6 +290,7 @@ function PortfolioProvider({ children }) {
       addVersion, 
       addReviewRequest, 
       updateRequestStatus,
+      submitReview,
       addPost
     }}>
       {children}

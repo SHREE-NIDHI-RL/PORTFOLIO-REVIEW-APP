@@ -18,7 +18,7 @@ function Register() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const navigate = useNavigate()
-  const { login } = useContext(AuthContext)
+  const { login, addUser } = useContext(AuthContext)
   const { addReviewer } = useContext(ReviewerContext)
 
   useEffect(() => {
@@ -62,12 +62,17 @@ function Register() {
       const userData = {
         name,
         email,
+        password,
         role,
         qualifications: role === "reviewer" ? qualifications : null,
         workplace: role === "reviewer" ? workplace : null,
         skills: role === "reviewer" ? skills : null,
       }
       
+      // Add user to AuthContext
+      addUser(userData)
+      
+      // If reviewer, also add to ReviewerContext
       if (role === "reviewer") {
         addReviewer(userData)
       }

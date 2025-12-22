@@ -32,8 +32,12 @@ function Login() {
       }
       
       await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
-      const userData = { email, role }
-      login(userData)
+      
+      const loginSuccess = login(email, password, role)
+      if (!loginSuccess) {
+        throw new Error("Invalid credentials or role")
+      }
+      
       navigate("/dashboard")
     } catch (err) {
       setError(err.message)
@@ -120,7 +124,8 @@ function Login() {
           </button>
         </form>
         <div className="auth-footer">
-          <p>Don't have an account? <Link to="/register" className="auth-link">Create Account</Link></p>
+          <p>Don't have an account? <Link to="/register" className="auth-link">Create Account</Link>
+          </p>
         </div>
       </div>
     </div>

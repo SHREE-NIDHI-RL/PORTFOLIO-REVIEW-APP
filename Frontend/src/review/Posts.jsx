@@ -2,6 +2,7 @@ import { useContext } from "react"
 import { PortfolioContext } from "../context/PortfolioContext"
 import { AuthContext } from "../context/AuthContext"
 import OwnerNavbar from "../components/OwnerNavbar"
+import ReviewerNavbar from "../components/ReviewerNavbar"
 import UserProfile from "../components/UserProfile"
 import "../styles/Posts.css"
 
@@ -14,15 +15,12 @@ function Posts() {
 
   return (
     <div className="dashboard-with-navbar">
-      <OwnerNavbar />
+      {user?.role === "owner" ? <OwnerNavbar /> : <ReviewerNavbar />}
       <UserProfile />
       <div className="posts-container">
         <div className="posts-header">
           <h1 className="posts-title">Portfolio Posts</h1>
           <p className="posts-subtitle">Share your portfolios and reviews with the community</p>
-          <div className="demo-note">
-            <p>📱 Demo Data: {posts.length} posts showcasing portfolios with professional reviews</p>
-          </div>
         </div>
 
         <div className="posts-stats">

@@ -8,11 +8,12 @@ import "../styles/ReviewerDashboard.css"
 
 function ReviewerDashboard() {
   const { user } = useContext(AuthContext)
-  const { reviewRequests, updateRequestStatus } = useContext(PortfolioContext)
+  const { reviewRequests, updateRequestStatus, posts } = useContext(PortfolioContext)
   
   const pendingRequests = reviewRequests.filter(req => 
     req.reviewerEmail === user?.email && req.status === "pending"
   )
+  const recentPosts = posts.slice(0, 3)
 
   const handleAcceptRequest = (requestId) => {
     updateRequestStatus(requestId, "accepted")
@@ -122,6 +123,55 @@ function ReviewerDashboard() {
                 </div>
               </div>
             )}
+
+            <section className="posts-section">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                <h2 className="section-title">Recent Community Posts</h2>
+                <Link to="/posts" className="auth-link">View All Posts</Link>
+              </div>
+              {recentPosts.length > 0 ? (
+                <div className="posts-preview">
+                  {recentPosts.map(post => (
+                    <div key={post.id} style={{ 
+                      border: "1px solid #ddd", 
+                      padding: "1rem", 
+                      margin: "0.5rem 0", 
+                      borderRadius: "8px",
+                      backgroundColor: "#f8f9fa"
+                    }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                        <div>
+                          <strong>{post.authorName}</strong>
+                          <span style={{ marginLeft: "1rem", color: "#666" }}>
+                            {new Date(post.postDate).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <span style={{ 
+                          backgroundColor: "#007bff", 
+                          color: "white", 
+                          padding: "0.2rem 0.5rem", 
+                          borderRadius: "4px", 
+                          fontSize: "0.8rem" 
+                        }}>
+                          {post.reviewScore}/10
+                        </span>
+                      </div>
+                      <h4 style={{ margin: "0.5rem 0" }}>{post.portfolioTitle}</h4>
+                      <p style={{ margin: "0.5rem 0", fontSize: "0.9rem" }}>
+                        Reviewed by <strong>{post.reviewerName}</strong>
+                      </p>
+                      <p style={{ margin: "0", fontSize: "0.85rem", color: "#666" }}>
+                        "{post.reviewFeedback.substring(0, 100)}..."
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: "center", padding: "2rem" }}>
+                  <p>No posts yet. Complete reviews to see community posts!</p>
+                </div>
+              )}
+            </section>
           </div>
         </div>
       </div>
