@@ -53,9 +53,6 @@ function SavedPortfolios() {
       <div className="saved-portfolios-container">
         <div className="saved-portfolios-header">
           <h2 className="saved-portfolios-title">Saved Portfolios</h2>
-          <div className="demo-note">
-            <p>💾 Demo Data: 4 sample portfolios with multiple versions for testing</p>
-          </div>
         </div>
         
         <button 
@@ -98,8 +95,9 @@ function SavedPortfolios() {
           <div className="portfolio-grid">
             {userPortfolios.map(portfolio => {
               const latestVersion = getLatestVersion(portfolio)
+              const isSelected = selectedPortfolio?.id === portfolio.id
               return (
-                <div key={portfolio.id} className="portfolio-card">
+                <div key={portfolio.id} className={`portfolio-card ${isSelected ? 'selected' : ''}`}>
                   <h3>{portfolio.title}</h3>
                   <p>{latestVersion ? latestVersion.content : portfolio.content}</p>
                   <div className="portfolio-meta">
@@ -114,76 +112,64 @@ function SavedPortfolios() {
                       View Versions
                     </button>
                     <button 
-                      onClick={() => setSelectedPortfolio(portfolio)} 
+                      onClick={() => setSelectedPortfolio(isSelected ? null : portfolio)} 
                       className="add-version-btn"
                     >
-                      Add Version
+                      {isSelected ? 'Cancel' : 'Add Version'}
                     </button>
                   </div>
+
+                  {isSelected && (
+                    <div className="version-form-inline">
+                      <h4>Add New Version</h4>
+                      <form onSubmit={handleAddVersion}>
+                        <select 
+                          value={versionType} 
+                          onChange={(e) => setVersionType(e.target.value)} 
+                          className="auth-select"
+                        >
+                          <option value="text">Add Text Content</option>
+                          <option value="files">Upload Files</option>
+                        </select>
+
+                        {versionType === "text" ? (
+                          <textarea 
+                            placeholder="Enter updated portfolio content..." 
+                            value={newVersionContent} 
+                            onChange={(e) => setNewVersionContent(e.target.value)} 
+                            className="auth-input" 
+                            rows="4" 
+                            required 
+                          />
+                        ) : (
+                          <>
+                            <input 
+                              type="file" 
+                              multiple 
+                              onChange={(e) => setVersionFiles(e.target.files)} 
+                              className="auth-input" 
+                              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.zip" 
+                              required 
+                            />
+                            <textarea 
+                              placeholder="Optional: Add description for this version..." 
+                              value={newVersionContent} 
+                              onChange={(e) => setNewVersionContent(e.target.value)} 
+                              className="auth-input" 
+                              rows="2" 
+                            />
+                          </>
+                        )}
+
+                        <div className="form-actions">
+                          <button type="submit" className="auth-button">Add Version</button>
+                        </div>
+                      </form>
+                    </div>
+                  )}
                 </div>
               )
             })}
-
-            {selectedPortfolio && (
-              <div className="version-form-section">
-                <h3>Add Version to: {selectedPortfolio.title}</h3>
-                <form onSubmit={handleAddVersion}>
-                  <select 
-                    value={versionType} 
-                    onChange={(e) => setVersionType(e.target.value)} 
-                    className="auth-select"
-                  >
-                    <option value="text">Add Text Content</option>
-                    <option value="files">Upload Files</option>
-                  </select>
-
-                  {versionType === "text" ? (
-                    <textarea 
-                      placeholder="Enter updated portfolio content..." 
-                      value={newVersionContent} 
-                      onChange={(e) => setNewVersionContent(e.target.value)} 
-                      className="auth-input" 
-                      rows="4" 
-                      required 
-                    />
-                  ) : (
-                    <>
-                      <input 
-                        type="file" 
-                        multiple 
-                        onChange={(e) => setVersionFiles(e.target.files)} 
-                        className="auth-input" 
-                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.zip" 
-                        required 
-                      />
-                      <textarea 
-                        placeholder="Optional: Add description for this version..." 
-                        value={newVersionContent} 
-                        onChange={(e) => setNewVersionContent(e.target.value)} 
-                        className="auth-input" 
-                        rows="2" 
-                      />
-                    </>
-                  )}
-
-                  <div className="form-actions">
-                    <button type="submit" className="auth-button">Add Version</button>
-                    <button 
-                      type="button" 
-                      onClick={() => { 
-                        setSelectedPortfolio(null); 
-                        setVersionType("text"); 
-                        setNewVersionContent(""); 
-                        setVersionFiles(null) 
-                      }} 
-                      className="cancel-btn"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
           </div>
         )}
       </div>

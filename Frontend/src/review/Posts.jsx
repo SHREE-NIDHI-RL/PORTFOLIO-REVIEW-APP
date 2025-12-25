@@ -28,14 +28,6 @@ function Posts() {
             <h3>Your Posts</h3>
             <span className="stat-number">{userPosts.length}</span>
           </div>
-          <div className="stat-card">
-            <h3>Total Posts</h3>
-            <span className="stat-number">{posts.length}</span>
-          </div>
-          <div className="stat-card">
-            <h3>Total Likes</h3>
-            <span className="stat-number">{posts.reduce((sum, post) => sum + post.likes, 0)}</span>
-          </div>
         </div>
 
         {allPosts.length === 0 ? (

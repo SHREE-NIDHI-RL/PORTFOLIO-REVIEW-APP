@@ -1,14 +1,16 @@
-import { useContext } from "react"
+import { useContext, useState } from "react"
 import { AuthContext } from "../context/AuthContext"
 import { PortfolioContext } from "../context/PortfolioContext"
 import { Link } from "react-router-dom"
 import OwnerNavbar from "../components/OwnerNavbar"
 import UserProfile from "../components/UserProfile"
 import "../styles/OwnerDashboard.css"
+import "../styles/ReviewWorkflow.css"
 
 function OwnerDashboard() {
   const { user } = useContext(AuthContext)
   const { portfolios, reviewRequests, addPost, posts } = useContext(PortfolioContext)
+  const [selectedReview, setSelectedReview] = useState(null)
   
   const userPortfolios = portfolios.filter(p => p.owner === user?.email)
   const completedReviews = reviewRequests.filter(req => 
@@ -28,9 +30,10 @@ function OwnerDashboard() {
     }
     addPost(postData)
     alert("Review posted successfully!")
+    setSelectedReview(null)
   }
 
-  const portfolios = userPortfolios.map((portfolio, index) => ({
+  const portfolios_display = userPortfolios.map((portfolio, index) => ({
     id: portfolio.id,
     title: portfolio.title,
     version: portfolio.versions?.length || 1,
@@ -60,7 +63,7 @@ function OwnerDashboard() {
             <section className="portfolios-section">
               <h2 className="section-title">Saved Portfolios</h2>
               <div className="portfolios-grid">
-                {portfolios.map(portfolio => (
+                {portfolios_display.map(portfolio => (
                   <div key={portfolio.id} className="portfolio-item">
                     <div className="portfolio-content">
                       <div className="portfolio-info">
@@ -127,8 +130,19 @@ function OwnerDashboard() {
                         <div className="review-body">
                           <h4>Portfolio: {review.portfolioTitle}</h4>
                           <div className="review-text">
-                            <p className="review-comment">"{review.feedback}"</p>
-                            <div style={{ marginTop: "1rem" }}>
+                            <p className="review-comment">"{review.feedback.substring(0, 100)}..."</p>
+                            <div style={{ marginTop: "1rem", display: "flex", gap: "1rem" }}>
+                              <button 
+                                onClick={() => setSelectedReview(review)}
+                                className="auth-button"
+                                style={{ 
+                                  background: "#6c757d", 
+                                  padding: "0.5rem 1rem", 
+                                  fontSize: "0.9rem" 
+                                }}
+                              >
+                                View Feedback
+                              </button>
                               <button 
                                 onClick={() => handlePostReview(review)}
                                 className="auth-button"
@@ -154,6 +168,77 @@ function OwnerDashboard() {
                 </div>
               )}
             </section>
+            
+            {selectedReview && (
+              <div className="feedback-modal">
+                <div className="feedback-card">
+                  <div className="review-card-header">
+                    <h2 className="review-card-title">Review Feedback</h2>
+                    <button 
+                      className="close-btn"
+                      onClick={() => setSelectedReview(null)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                  
+                  <div className="reviewer-profile">
+                    <div className="reviewer-profile-avatar">
+                      {selectedReview.reviewerName.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="reviewer-profile-info">
+                      <h3>{selectedReview.reviewerName}</h3>
+                      <p>Senior UX Designer • <span className="google-verified">✓ Google</span></p>
+                      <p>Credibility: <strong>4.8</strong></p>
+                    </div>
+                  </div>
+                  
+                  <div className="score-section">
+                    <div className="score-item">
+                      <span className="score-label">Visual Design:</span>
+                      <span className="score-value">{Math.floor(selectedReview.score * 0.9)}</span>
+                    </div>
+                    <div className="score-item">
+                      <span className="score-label">Usability:</span>
+                      <span className="score-value">{Math.floor(selectedReview.score * 0.8)}</span>
+                    </div>
+                    <div className="score-item">
+                      <span className="score-label">Content:</span>
+                      <span className="score-value">{Math.floor(selectedReview.score * 0.7)}</span>
+                    </div>
+                  </div>
+                  
+                  <ul className="feedback-list">
+                    <li>Great visual consistency and attention to detail.</li>
+                    <li>Usability is strong, but consider simplifying the navigation.</li>
+                    <li>Content is good, but could be more concise.</li>
+                  </ul>
+                  
+                  <div style={{ marginTop: "1.5rem", padding: "1rem", background: "#f8f9fa", borderRadius: "8px" }}>
+                    <h4>Full Feedback:</h4>
+                    <p style={{ margin: "0.5rem 0 0 0", fontSize: "0.9rem", lineHeight: "1.5" }}>
+                      {selectedReview.feedback}
+                    </p>
+                  </div>
+                  
+                  <div style={{ marginTop: "1.5rem", display: "flex", gap: "1rem" }}>
+                    <button 
+                      onClick={() => handlePostReview(selectedReview)}
+                      className="send-request-btn"
+                    >
+                      Post Review
+                    </button>
+                    <button 
+                      onClick={() => setSelectedReview(null)}
+                      className="decline-btn"
+                      style={{ flex: "none", padding: "0.75rem 1.5rem" }}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <section className="posts-section">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>

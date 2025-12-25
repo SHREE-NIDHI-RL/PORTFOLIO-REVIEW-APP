@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react"
+import { useState, useContext } from "react"
 import { AuthContext } from "../context/AuthContext"
 import { useNavigate, Link } from "react-router-dom"
 import "../styles/auth.css"
@@ -6,20 +6,13 @@ import "../styles/auth.css"
 function Login() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [role, setRole] = useState("")
   const [rememberMe, setRememberMe] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [showForgotPassword, setShowForgotPassword] = useState(false)
   const { login } = useContext(AuthContext)
   const navigate = useNavigate()
-
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => setError(""), 5000)
-      return () => clearTimeout(timer)
-    }
-  }, [error])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -27,15 +20,15 @@ function Login() {
     setError("")
     
     try {
-      if (!email || !password || !role) {
+      if (!email || !password) {
         throw new Error("Please fill in all fields")
       }
       
-      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000))
       
-      const loginSuccess = login(email, password, role)
+      const loginSuccess = login(email, password, 'owner')
       if (!loginSuccess) {
-        throw new Error("Invalid credentials or role")
+        throw new Error("Invalid credentials")
       }
       
       navigate("/dashboard")
@@ -58,74 +51,160 @@ function Login() {
   
   if (showForgotPassword) {
     return (
-      <div className="auth-container">
-        <div className="auth-card">
-          <div className="auth-header">
-            <h2 className="auth-title">Reset Password</h2>
-            <p className="auth-subtitle">Enter your email to receive reset instructions</p>
-          </div>
-          <form onSubmit={handleForgotPassword} className="auth-form">
-            {error && <div className="error-message">{error}</div>}
-            <div className="input-group">
-              <input type="email" placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} className="auth-input" required />
-              <span className="input-icon">📧</span>
+      <div className="auth-page">
+        <div className="auth-container-split">
+          <div className="auth-left">
+            <div className="brand-header">
+              <div className="brand-icon">💼</div>
+              <h1 className="brand-title">Portfolio Review Platform</h1>
             </div>
-            <button type="submit" className="auth-button">Send Reset Link</button>
-            <button type="button" onClick={() => setShowForgotPassword(false)} className="auth-button" style={{ background: "#6c757d" }}>Back to Login</button>
-          </form>
+            <div className="auth-illustration">
+              <div className="illustration-container">
+                <div className="person person-1">
+                  <div className="person-body"></div>
+                  <div className="person-head"></div>
+                </div>
+                <div className="person person-2">
+                  <div className="person-body"></div>
+                  <div className="person-head"></div>
+                </div>
+                <div className="dashboard-mockup">
+                  <div className="dashboard-header"></div>
+                  <div className="dashboard-content">
+                    <div className="chart"></div>
+                    <div className="stats"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="auth-right">
+            <div className="auth-form-container">
+              <h2 className="auth-title">Reset Password</h2>
+              <form onSubmit={handleForgotPassword} className="auth-form">
+                {error && <div className="error-message">{error}</div>}
+                <div className="form-group">
+                  <label>Email</label>
+                  <input 
+                    type="email" 
+                    placeholder="Email" 
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)} 
+                    className="form-input" 
+                    required 
+                  />
+                </div>
+                <button type="submit" className="btn-primary">Send Reset Link</button>
+                <button 
+                  type="button" 
+                  onClick={() => setShowForgotPassword(false)} 
+                  className="btn-secondary"
+                >
+                  Back to Login
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="auth-header">
-          <h2 className="auth-title">Welcome Back</h2>
-          <p className="auth-subtitle">Sign in to your account</p>
+    <div className="auth-page">
+      <div className="auth-container-split">
+        <div className="auth-left">
+          <div className="brand-header">
+            <div className="brand-icon">💼</div>
+            <h1 className="brand-title">Portfolio Review Platform</h1>
+          </div>
+          <div className="auth-illustration">
+            <div className="illustration-container">
+              <div className="person person-1">
+                <div className="person-body"></div>
+                <div className="person-head"></div>
+              </div>
+              <div className="person person-2">
+                <div className="person-body"></div>
+                <div className="person-head"></div>
+              </div>
+              <div className="dashboard-mockup">
+                <div className="dashboard-header"></div>
+                <div className="dashboard-content">
+                  <div className="chart"></div>
+                  <div className="stats"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <h2 className="page-title">Sign in to your account</h2>
         </div>
-        <form onSubmit={handleSubmit} className="auth-form">
-          {error && <div className="error-message">{error}</div>}
-          <div className="input-group">
-            <input type="email" placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} className="auth-input" required />
-            <span className="input-icon">📧</span>
+        
+        <div className="auth-right">
+          <div className="auth-form-container">
+            <form onSubmit={handleSubmit} className="auth-form">
+              {error && <div className="error-message">{error}</div>}
+              
+              <div className="form-group">
+                <label>Email</label>
+                <input 
+                  type="email" 
+                  placeholder="Email" 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)} 
+                  className="form-input" 
+                  required 
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Password</label>
+                <div className="password-input">
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="Password" 
+                    value={password} 
+                    onChange={(e) => setPassword(e.target.value)} 
+                    className="form-input" 
+                    required 
+                  />
+                  <button 
+                    type="button" 
+                    className="password-toggle" 
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    👁️
+                  </button>
+                </div>
+              </div>
+              
+              <div className="form-options">
+                <label className="checkbox-label">
+                  <input 
+                    type="checkbox" 
+                    checked={rememberMe} 
+                    onChange={(e) => setRememberMe(e.target.checked)} 
+                  />
+                  Remember me
+                </label>
+                <button 
+                  type="button" 
+                  onClick={() => setShowForgotPassword(true)} 
+                  className="forgot-link"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+              
+              <button type="submit" className="btn-primary" disabled={isLoading}>
+                {isLoading ? "Signing In..." : "Log In"}
+              </button>
+            </form>
+            
+            <div className="auth-footer">
+              <p>Don't have an account? <Link to="/register" className="auth-link">Create an account</Link></p>
+            </div>
           </div>
-          <div className="input-group">
-            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="auth-input" required />
-            <span className="input-icon">🔒</span>
-          </div>
-          <div className="role-buttons">
-            <button 
-              type="button" 
-              className={`role-button ${role === 'owner' ? 'active' : ''}`}
-              onClick={() => setRole('owner')}
-            >
-              Portfolio Owner
-            </button>
-            <button 
-              type="button" 
-              className={`role-button ${role === 'reviewer' ? 'active' : ''}`}
-              onClick={() => setRole('reviewer')}
-            >
-              Reviewer
-            </button>
-          </div>
-          <div className="auth-options">
-            <label className="remember-me">
-              <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
-              Remember me
-            </label>
-            <button type="button" onClick={() => setShowForgotPassword(true)} className="forgot-password">Forgot Password?</button>
-          </div>
-          <button type="submit" className="auth-button" disabled={isLoading}>
-            {isLoading && <span className="loading-spinner"></span>}
-            {isLoading ? "Signing In..." : "Sign In"}
-          </button>
-        </form>
-        <div className="auth-footer">
-          <p>Don't have an account? <Link to="/register" className="auth-link">Create Account</Link>
-          </p>
         </div>
       </div>
     </div>

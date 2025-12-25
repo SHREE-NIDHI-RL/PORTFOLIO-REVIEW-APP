@@ -2,7 +2,7 @@ import { useState, useContext } from "react"
 import { AuthContext } from "../context/AuthContext"
 import { PortfolioContext } from "../context/PortfolioContext"
 import ReviewerNavbar from "../components/ReviewerNavbar"
-import "../styles/auth.css"
+import "../styles/ReviewWorkflow.css"
 
 function ReviewRequests() {
   const { user } = useContext(AuthContext)
@@ -20,102 +20,99 @@ function ReviewRequests() {
   return (
     <div className="dashboard-with-navbar">
       <ReviewerNavbar />
-      <div className="auth-container">
-        <div className="auth-card" style={{ maxWidth: "800px" }}>
-          <h2 className="auth-title">Review Requests</h2>
-          
-          {pendingRequests.length > 0 && (
-            <div style={{ marginBottom: "2rem" }}>
-              <h3>Pending Requests</h3>
-              {pendingRequests.map((req) => (
-                <div key={req.id} style={{ 
-                  border: "1px solid #ddd", 
-                  padding: "1rem", 
-                  margin: "1rem 0", 
-                  borderRadius: "8px" 
-                }}>
-                  <div style={{ marginBottom: "1rem" }}>
-                    <h4>Portfolio: {req.portfolioTitle}</h4>
-                    <p><strong>From:</strong> {req.ownerName} ({req.ownerEmail})</p>
-                    <p><strong>Requested:</strong> {new Date(req.requestDate).toLocaleDateString()}</p>
+      <div style={{ padding: "2rem" }}>
+        <h1 style={{ marginBottom: "2rem", color: "#333" }}>Review Requests</h1>
+        
+        {pendingRequests.length === 0 && acceptedRequests.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "3rem", color: "#666" }}>
+            <h3>No review requests found</h3>
+            <p>You'll see portfolio review requests here when owners send them to you.</p>
+          </div>
+        ) : (
+          <div>
+            {pendingRequests.map((req) => (
+              <div key={req.id} className="review-request-card">
+                <div className="request-header">
+                  <div>
+                    <h3 className="request-title">{req.portfolioTitle}</h3>
+                    <p className="request-meta">Requested by: {req.ownerName}</p>
                   </div>
-                  <div style={{ 
-                    backgroundColor: "#f8f9fa", 
-                    padding: "1rem", 
-                    borderRadius: "4px", 
-                    marginBottom: "1rem" 
-                  }}>
-                    <h5>Portfolio Content:</h5>
-                    <p>{req.portfolioContent}</p>
-                  </div>
-                  <div style={{ display: "flex", gap: "1rem" }}>
-                    <button 
-                      onClick={() => handleRequest(req.id, "accepted")}
-                      className="auth-button"
-                      style={{ background: "#28a745" }}
-                    >
-                      Accept & Review
-                    </button>
-                    <button 
-                      onClick={() => handleRequest(req.id, "rejected")}
-                      className="auth-button"
-                      style={{ background: "#dc3545" }}
-                    >
-                      Reject
-                    </button>
+                  <div className="skill-tag">
+                    {req.portfolioTitle.includes('UX') ? 'UI/UX Design' : 
+                     req.portfolioTitle.includes('Web') ? 'Web Development' :
+                     req.portfolioTitle.includes('Mobile') ? 'Mobile Development' : 'Design'}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-          
-          {acceptedRequests.length > 0 && (
-            <div>
-              <h3>Accepted - Ready to Review</h3>
-              {acceptedRequests.map((req) => (
-                <div key={req.id} style={{ 
-                  border: "1px solid #28a745", 
+                
+                <div style={{ 
+                  background: "#f8f9fa", 
                   padding: "1rem", 
-                  margin: "1rem 0", 
-                  borderRadius: "8px",
-                  backgroundColor: "#f8fff9"
+                  borderRadius: "8px", 
+                  margin: "1rem 0",
+                  fontSize: "0.9rem",
+                  color: "#666"
                 }}>
-                  <div style={{ marginBottom: "1rem" }}>
-                    <h4>Portfolio: {req.portfolioTitle}</h4>
-                    <p><strong>From:</strong> {req.ownerName} ({req.ownerEmail})</p>
-                    <p><strong>Status:</strong> Ready for Review</p>
+                  {req.portfolioContent.substring(0, 200)}...
+                </div>
+                
+                <div className="request-actions">
+                  <button 
+                    onClick={() => handleRequest(req.id, "accepted")}
+                    className="accept-btn"
+                  >
+                    Accept
+                  </button>
+                  <button 
+                    onClick={() => handleRequest(req.id, "rejected")}
+                    className="decline-btn"
+                  >
+                    Decline
+                  </button>
+                </div>
+              </div>
+            ))}
+            
+            {acceptedRequests.map((req) => (
+              <div key={req.id} className="review-request-card" style={{ border: "2px solid #d4edda" }}>
+                <div className="request-header">
+                  <div>
+                    <h3 className="request-title">{req.portfolioTitle}</h3>
+                    <p className="request-meta">Requested by: {req.ownerName}</p>
                   </div>
-                  <div style={{ 
-                    backgroundColor: "#ffffff", 
-                    padding: "1rem", 
-                    borderRadius: "4px", 
-                    marginBottom: "1rem" 
-                  }}>
-                    <h5>Portfolio Content:</h5>
-                    <p>{req.portfolioContent}</p>
+                  <div className="accepted-badge">
+                    Accepted
                   </div>
+                </div>
+                
+                <div style={{ 
+                  background: "#f8f9fa", 
+                  padding: "1rem", 
+                  borderRadius: "8px", 
+                  margin: "1rem 0",
+                  fontSize: "0.9rem",
+                  color: "#666"
+                }}>
+                  {req.portfolioContent}
+                </div>
+                
+                <div className="request-actions">
                   <a 
                     href={`/submit-review?requestId=${req.id}`}
-                    className="auth-button"
+                    className="accept-btn"
                     style={{ 
                       textDecoration: "none", 
-                      display: "inline-block", 
-                      textAlign: "center" 
+                      display: "block", 
+                      textAlign: "center",
+                      background: "#28a745"
                     }}
                   >
                     Submit Review
                   </a>
                 </div>
-              ))}
-            </div>
-          )}
-          
-          {userRequests.length === 0 && (
-            <div style={{ textAlign: "center", padding: "2rem" }}>
-              <p>No review requests found.</p>
-            </div>
-          )}
-        </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

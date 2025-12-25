@@ -45,9 +45,6 @@ function ViewFeedback() {
         <div className="view-feedback-header">
           <h1 className="view-feedback-title">Portfolio Reviews & Feedback</h1>
           <p className="view-feedback-subtitle">View all reviews received for your portfolios</p>
-          <div className="demo-note">
-            <p>📊 Demo Data: 4 portfolios with 5 completed reviews from professional reviewers</p>
-          </div>
         </div>
 
         {userPortfolios.length === 0 ? (
