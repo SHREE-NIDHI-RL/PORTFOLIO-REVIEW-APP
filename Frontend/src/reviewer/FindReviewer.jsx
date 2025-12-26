@@ -14,7 +14,7 @@ function FindReviewer() {
   const [showRequestModal, setShowRequestModal] = useState(false)
   const [selectedReviewer, setSelectedReviewer] = useState(null)
   const [selectedPortfolio, setSelectedPortfolio] = useState("")
-  const [searchDomain, setSearchDomain] = useState("")
+  const [searchQuery, setSearchQuery] = useState("")
   const { success, warning } = useNotificationContext()
 
   const userPortfolios = portfolios.filter(p => p.owner === user?.email)
@@ -25,9 +25,17 @@ function FindReviewer() {
     ).length
   }
 
-  const filteredReviewers = reviewers.filter(reviewer => 
-    !searchDomain || reviewer.skills.toLowerCase().includes(searchDomain.toLowerCase())
-  )
+  const filteredReviewers = reviewers.filter(reviewer => {
+    if (!searchQuery.trim()) return true
+    
+    const query = searchQuery.toLowerCase()
+    return (
+      reviewer.name.toLowerCase().includes(query) ||
+      reviewer.skills.toLowerCase().includes(query) ||
+      reviewer.workplace.toLowerCase().includes(query) ||
+      reviewer.qualifications.toLowerCase().includes(query)
+    )
+  })
 
   const handleRequestReview = () => {
     if (!selectedPortfolio) {
@@ -56,14 +64,62 @@ function FindReviewer() {
         <div className="page-header">
           <h1>Find Reviewers</h1>
           <p>Connect with professional reviewers to get feedback on your portfolio</p>
-          <div style={{ marginTop: "1rem" }}>
+          <div style={{ marginTop: "1rem", display: "flex", alignItems: "center", gap: "1rem" }}>
             <input
               type="text"
-              placeholder="Search by domain or skills..."
-              value={searchDomain}
-              onChange={(e) => setSearchDomain(e.target.value)}
-              style={{ padding: "0.5rem", width: "300px", border: "1px solid #ddd", borderRadius: "4px" }}
+              placeholder="Search by name, domain, skills, or workplace..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ 
+                padding: "0.75rem", 
+                width: "400px", 
+                border: "1px solid #ddd", 
+                borderRadius: "6px",
+                fontSize: "0.9rem"
+              }}
             />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery("")}
+                style={{
+                  padding: "0.75rem 1rem",
+                  background: "#6b7280",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "0.9rem"
+                }}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <p style={{ marginTop: "0.5rem", color: "#666", fontSize: "0.9rem" }}>
+              Found {filteredReviewers.length} reviewer{filteredReviewers.length !== 1 ? 's' : ''} matching "{searchQuery}"
+            </p>
+          )}
+          <div style={{ marginTop: "1rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <span style={{ fontSize: "0.9rem", color: "#666", marginRight: "0.5rem" }}>Quick filters:</span>
+            {['UI/UX', 'Web Development', 'Mobile', 'Design', 'Frontend', 'Backend'].map(filter => (
+              <button
+                key={filter}
+                onClick={() => setSearchQuery(filter)}
+                style={{
+                  padding: "0.25rem 0.75rem",
+                  background: searchQuery === filter ? "#2563eb" : "#f3f4f6",
+                  color: searchQuery === filter ? "white" : "#374151",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "16px",
+                  fontSize: "0.8rem",
+                  cursor: "pointer",
+                  transition: "all 0.2s"
+                }}
+              >
+                {filter}
+              </button>
+            ))}
           </div>
         </div>
         
@@ -83,7 +139,8 @@ function FindReviewer() {
                   </div>
                   <div className="reviewer-basic-info">
                     <h3>{reviewer.name}</h3>
-                    <p className="reviewer-specialty">{reviewer.skills || "Professional Reviewer"}</p>
+                    <p className="reviewer-specialty">{reviewer.skills.split(',')[0] || "Professional Reviewer"}</p>
+                    <p style={{ fontSize: "0.8rem", color: "#666", margin: "0.25rem 0" }}>{reviewer.workplace}</p>
                     <div className="reviewer-stats">
                       <span className="review-count">{reviewCount} Reviews</span>
                       <span className="rating">⭐ {reviewer.credibilityScore || 4.5}/5</span>
@@ -97,27 +154,27 @@ function FindReviewer() {
                 {isExpanded && (
                   <div className="reviewer-details">
                     <div className="detail-section">
-                      <h4>Qualifications</h4>
-                      <p>{reviewer.qualifications}</p>
-                    </div>
-                    
-                    <div className="detail-section">
-                      <h4>Workplace</h4>
-                      <p>{reviewer.workplace}</p>
-                    </div>
-                    
-                    <div className="detail-section">
-                      <h4>Review Statistics</h4>
-                      <div className="stats-grid">
-                        <div className="stat-item">
-                          <span className="stat-number">{reviewCount}</span>
-                          <span className="stat-label">Reviews</span>
-                        </div>
-                        <div className="stat-item">
-                          <span className="stat-number">{reviewer.credibilityScore}</span>
-                          <span className="stat-label">Rating</span>
-                        </div>
+                      <h4>Skills & Expertise</h4>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.5rem" }}>
+                        {reviewer.skills.split(',').map((skill, index) => (
+                          <span key={index} style={{
+                            background: "#e0f2fe",
+                            color: "#0277bd",
+                            padding: "0.25rem 0.5rem",
+                            borderRadius: "12px",
+                            fontSize: "0.8rem",
+                            fontWeight: "500"
+                          }}>
+                            {skill.trim()}
+                          </span>
+                        ))}
                       </div>
+                    </div>
+                    
+                    <div className="detail-section">
+                      <h4>Professional Background</h4>
+                      <p><strong>Workplace:</strong> {reviewer.workplace}</p>
+                      <p><strong>Qualifications:</strong> {reviewer.qualifications}</p>
                     </div>
                     
                     <button 
