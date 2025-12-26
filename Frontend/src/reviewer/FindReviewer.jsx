@@ -3,6 +3,7 @@ import { ReviewerContext } from "../context/ReviewerContext"
 import { PortfolioContext } from "../context/PortfolioContext"
 import { AuthContext } from "../context/AuthContext"
 import OwnerNavbar from "../components/OwnerNavbar"
+import { useNotificationContext } from "../context/NotificationContext"
 import "../styles/FindReviewer.css"
 
 function FindReviewer() {
@@ -14,6 +15,7 @@ function FindReviewer() {
   const [selectedReviewer, setSelectedReviewer] = useState(null)
   const [selectedPortfolio, setSelectedPortfolio] = useState("")
   const [selectedVersion, setSelectedVersion] = useState("")
+  const { success, warning } = useNotificationContext()
 
   const userPortfolios = portfolios.filter(p => p.owner === user?.email)
 
@@ -21,6 +23,16 @@ function FindReviewer() {
     return reviewRequests.filter(req => 
       req.reviewerEmail === reviewerEmail && req.status === "completed"
     ).length
+  }
+
+  const hasRequestForReviewer = (reviewerEmail, portfolioTitle, version) => {
+    return reviewRequests.some(req => 
+      req.reviewerEmail === reviewerEmail && 
+      req.ownerEmail === user?.email &&
+      req.portfolioTitle === portfolioTitle &&
+      req.portfolioVersion === version &&
+      (req.status === "pending" || req.status === "accepted")
+    )
   }
 
   const getPortfolioVersions = (portfolioTitle) => {
@@ -31,13 +43,15 @@ function FindReviewer() {
 
   const handleRequestReview = () => {
     if (!selectedPortfolio || !selectedVersion) {
-      alert("Please select both portfolio and version")
+      warning("Please select both portfolio and version")
       return
     }
     
     const portfolio = userPortfolios.find(p => p.title === selectedPortfolio)
     const versions = getPortfolioVersions(selectedPortfolio)
     const versionContent = versions.find(v => v.version.toString() === selectedVersion)?.content || portfolio.content
+    
+    const hasExistingRequest = hasRequestForReviewer(selectedReviewer.email, selectedPortfolio, selectedVersion)
     
     const requestData = {
       reviewerEmail: selectedReviewer.email,
@@ -57,7 +71,13 @@ function FindReviewer() {
     }
     
     addReviewRequest(requestData)
-    alert(`Review request sent to ${selectedReviewer.name}!`)
+    
+    if (hasExistingRequest) {
+      success(`Another review request sent to ${selectedReviewer.name} for "${portfolio.title}" Version ${selectedVersion}!`)
+    } else {
+      success(`Review request sent to ${selectedReviewer.name} for "${portfolio.title}" Version ${selectedVersion}!`)
+    }
+    
     setShowRequestModal(false)
     setSelectedReviewer(null)
     setSelectedPortfolio("")
@@ -189,11 +209,14 @@ function FindReviewer() {
                       className="form-select"
                     >
                       <option value="">Choose version...</option>
-                      {getPortfolioVersions(selectedPortfolio).map((version) => (
-                        <option key={version.version} value={version.version}>
-                          Version {version.version}
-                        </option>
-                      ))}
+                      {getPortfolioVersions(selectedPortfolio).map((version) => {
+                        const hasRequest = hasRequestForReviewer(selectedReviewer?.email, selectedPortfolio, version.version.toString())
+                        return (
+                          <option key={version.version} value={version.version}>
+                            Version {version.version} {hasRequest ? "(Request Sent)" : ""}
+                          </option>
+                        )
+                      })}
                     </select>
                   </div>
                 )}
@@ -205,13 +228,22 @@ function FindReviewer() {
                   >
                     Cancel
                   </button>
-                  <button 
-                    className="btn-primary"
-                    onClick={handleRequestReview}
-                    disabled={!selectedPortfolio || !selectedVersion}
-                  >
-                    Send Request
-                  </button>
+                  {selectedPortfolio && selectedVersion && hasRequestForReviewer(selectedReviewer?.email, selectedPortfolio, selectedVersion) ? (
+                    <button 
+                      className="btn-sent"
+                      onClick={handleRequestReview}
+                    >
+                      Sent Review - Want to send another?
+                    </button>
+                  ) : (
+                    <button 
+                      className="btn-primary"
+                      onClick={handleRequestReview}
+                      disabled={!selectedPortfolio || !selectedVersion}
+                    >
+                      Send Request
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

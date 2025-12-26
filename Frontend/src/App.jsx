@@ -18,12 +18,19 @@ import PortfolioVersions from "./portfolio/PortfolioVersions"
 import ViewReviews from "./review/ViewReviews"
 import ViewFeedback from "./review/ViewFeedback"
 import Posts from "./review/Posts"
+import NotificationDisplay from "./components/NotificationDisplay"
+import { useNotificationContext } from "./context/NotificationContext"
 
 function App() {
   const { user } = useContext(AuthContext)
+  const { notifications, removeNotification } = useNotificationContext()
 
   return (
     <BrowserRouter>
+      <NotificationDisplay 
+        notifications={notifications} 
+        removeNotification={removeNotification} 
+      />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />

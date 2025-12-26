@@ -3,6 +3,7 @@ import { AuthContext } from "../context/AuthContext"
 import { PortfolioContext } from "../context/PortfolioContext"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import ReviewerNavbar from "../components/ReviewerNavbar"
+import { useNotificationContext } from "../context/NotificationContext"
 import "../styles/auth.css"
 
 function SubmitReview() {
@@ -10,6 +11,7 @@ function SubmitReview() {
   const { reviewRequests, submitReview } = useContext(PortfolioContext)
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+  const { success, error } = useNotificationContext()
   
   const requestId = parseInt(searchParams.get('requestId'))
   const request = reviewRequests.find(req => req.id === requestId)
@@ -52,7 +54,7 @@ function SubmitReview() {
     }
 
     submitReview(requestId, reviewData)
-    alert("Review submitted successfully!")
+    success(`Review submitted successfully for "${request.portfolioTitle}"! The portfolio owner will be notified.`)
     navigate('/review-requests')
   }
 

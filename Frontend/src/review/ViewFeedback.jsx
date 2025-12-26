@@ -1,8 +1,9 @@
-import { useContext, useState } from "react"
+import { useContext, useState, useEffect } from "react"
 import { PortfolioContext } from "../context/PortfolioContext"
 import { ReviewerContext } from "../context/ReviewerContext"
 import { AuthContext } from "../context/AuthContext"
 import OwnerNavbar from "../components/OwnerNavbar"
+import { useNotificationContext } from "../context/NotificationContext"
 import "../styles/ViewFeedback.css"
 
 function ViewFeedback() {
@@ -10,6 +11,25 @@ function ViewFeedback() {
   const { reviewers } = useContext(ReviewerContext)
   const { user } = useContext(AuthContext)
   const [selectedReview, setSelectedReview] = useState(null)
+  const { success } = useNotificationContext()
+
+  const completedReviews = reviewRequests.filter(req => 
+    req.ownerEmail === user?.email && req.status === "completed"
+  )
+
+  // Show notification for new completed reviews
+  useEffect(() => {
+    const newReviews = completedReviews.filter(review => {
+      const reviewDate = new Date(review.reviewDate || review.requestDate)
+      const now = new Date()
+      const timeDiff = now - reviewDate
+      return timeDiff < 60000 // Reviews completed in the last minute
+    })
+    
+    newReviews.forEach(review => {
+      success(`New review received for "${review.portfolioTitle}" from ${review.reviewerName}!`)
+    })
+  }, [completedReviews, success])
 
   const handleCreatePost = (review, portfolio) => {
     const postData = {
@@ -19,16 +39,14 @@ function ViewFeedback() {
       portfolioContent: portfolio.content,
       reviewerName: review.reviewerName,
       reviewScore: review.score,
-      reviewFeedback: review.feedback
+      reviewFeedback: review.feedback,
+      createdAt: new Date().toISOString()
     }
     addPost(postData)
     alert("Portfolio and review posted successfully!")
   }
 
   const userPortfolios = portfolios.filter(p => p.owner === user?.email)
-  const completedReviews = reviewRequests.filter(req => 
-    req.ownerEmail === user?.email && req.status === "completed"
-  )
 
   const getReviewerProfile = (reviewerEmail) => {
     return reviewers.find(r => r.email === reviewerEmail)

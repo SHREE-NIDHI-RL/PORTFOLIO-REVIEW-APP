@@ -52,11 +52,6 @@ function OwnerDashboard() {
         <div className="owner-dashboard">
           <div className="dashboard-header">
             <h1 className="dashboard-title">Portfolio Review Dashboard</h1>
-            <button className="create-new-btn">
-              <span className="btn-icon">+</span>
-              Create New Portfolio
-              <span className="dropdown-arrow">⌄</span>
-            </button>
           </div>
 
           <div className="dashboard-content">
