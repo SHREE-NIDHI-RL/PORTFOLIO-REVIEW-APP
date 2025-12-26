@@ -139,6 +139,17 @@
   color: white;
 }
 
+.auth-link {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
 .dashboard-with-navbar {
   margin-left: 320px;
   margin-right: 20px;

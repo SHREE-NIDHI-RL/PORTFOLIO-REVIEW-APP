@@ -8,13 +8,13 @@ import "../styles/FindReviewer.css"
 
 function FindReviewer() {
   const { reviewers } = useContext(ReviewerContext)
-  const { portfolios, addReviewRequest, reviewRequests } = useContext(PortfolioContext)
+  const { portfolios, sendReviewRequest, reviewRequests } = useContext(PortfolioContext)
   const { user } = useContext(AuthContext)
   const [expandedReviewer, setExpandedReviewer] = useState(null)
   const [showRequestModal, setShowRequestModal] = useState(false)
   const [selectedReviewer, setSelectedReviewer] = useState(null)
   const [selectedPortfolio, setSelectedPortfolio] = useState("")
-  const [selectedVersion, setSelectedVersion] = useState("")
+  const [searchDomain, setSearchDomain] = useState("")
   const { success, warning } = useNotificationContext()
 
   const userPortfolios = portfolios.filter(p => p.owner === user?.email)
@@ -25,63 +25,28 @@ function FindReviewer() {
     ).length
   }
 
-  const hasRequestForReviewer = (reviewerEmail, portfolioTitle, version) => {
-    return reviewRequests.some(req => 
-      req.reviewerEmail === reviewerEmail && 
-      req.ownerEmail === user?.email &&
-      req.portfolioTitle === portfolioTitle &&
-      req.portfolioVersion === version &&
-      (req.status === "pending" || req.status === "accepted")
-    )
-  }
-
-  const getPortfolioVersions = (portfolioTitle) => {
-    const portfolio = userPortfolios.find(p => p.title === portfolioTitle)
-    if (!portfolio || !portfolio.versions) return [{ version: 1, content: portfolio?.content || "" }]
-    return portfolio.versions
-  }
+  const filteredReviewers = reviewers.filter(reviewer => 
+    !searchDomain || reviewer.skills.toLowerCase().includes(searchDomain.toLowerCase())
+  )
 
   const handleRequestReview = () => {
-    if (!selectedPortfolio || !selectedVersion) {
-      warning("Please select both portfolio and version")
+    if (!selectedPortfolio) {
+      warning("Please select a portfolio")
       return
     }
     
     const portfolio = userPortfolios.find(p => p.title === selectedPortfolio)
-    const versions = getPortfolioVersions(selectedPortfolio)
-    const versionContent = versions.find(v => v.version.toString() === selectedVersion)?.content || portfolio.content
+    const success_result = sendReviewRequest(portfolio.id, selectedReviewer.email)
     
-    const hasExistingRequest = hasRequestForReviewer(selectedReviewer.email, selectedPortfolio, selectedVersion)
-    
-    const requestData = {
-      reviewerEmail: selectedReviewer.email,
-      reviewerName: selectedReviewer.name,
-      ownerEmail: user.email,
-      ownerName: user.name || "Portfolio Owner",
-      portfolioTitle: portfolio.title,
-      portfolioContent: versionContent,
-      portfolioVersion: selectedVersion,
-      status: "pending",
-      requestDate: new Date().toISOString(),
-      ownerProfile: {
-        name: user.name || "Portfolio Owner",
-        email: user.email,
-        role: user.role
-      }
-    }
-    
-    addReviewRequest(requestData)
-    
-    if (hasExistingRequest) {
-      success(`Another review request sent to ${selectedReviewer.name} for "${portfolio.title}" Version ${selectedVersion}!`)
+    if (success_result) {
+      success(`Review request sent to ${selectedReviewer.name} for "${portfolio.title}"!`)
     } else {
-      success(`Review request sent to ${selectedReviewer.name} for "${portfolio.title}" Version ${selectedVersion}!`)
+      warning("Failed to send review request")
     }
     
     setShowRequestModal(false)
     setSelectedReviewer(null)
     setSelectedPortfolio("")
-    setSelectedVersion("")
   }
 
   return (
@@ -91,10 +56,19 @@ function FindReviewer() {
         <div className="page-header">
           <h1>Find Reviewers</h1>
           <p>Connect with professional reviewers to get feedback on your portfolio</p>
+          <div style={{ marginTop: "1rem" }}>
+            <input
+              type="text"
+              placeholder="Search by domain or skills..."
+              value={searchDomain}
+              onChange={(e) => setSearchDomain(e.target.value)}
+              style={{ padding: "0.5rem", width: "300px", border: "1px solid #ddd", borderRadius: "4px" }}
+            />
+          </div>
         </div>
         
         <div className="reviewers-grid">
-          {reviewers.map((reviewer) => {
+          {filteredReviewers.map((reviewer) => {
             const isExpanded = expandedReviewer === reviewer.id
             const reviewCount = getReviewCount(reviewer.email)
             
@@ -112,7 +86,7 @@ function FindReviewer() {
                     <p className="reviewer-specialty">{reviewer.skills || "Professional Reviewer"}</p>
                     <div className="reviewer-stats">
                       <span className="review-count">{reviewCount} Reviews</span>
-                      <span className="rating">⭐ {reviewer.credibility || 85}/100</span>
+                      <span className="rating">⭐ {reviewer.credibilityScore || 4.5}/5</span>
                     </div>
                   </div>
                   <div className="expand-icon">
@@ -124,17 +98,12 @@ function FindReviewer() {
                   <div className="reviewer-details">
                     <div className="detail-section">
                       <h4>Qualifications</h4>
-                      <p>{reviewer.qualifications || "Professional experience in portfolio review"}</p>
+                      <p>{reviewer.qualifications}</p>
                     </div>
                     
                     <div className="detail-section">
                       <h4>Workplace</h4>
-                      <p>{reviewer.workplace || "Independent Reviewer"}</p>
-                    </div>
-                    
-                    <div className="detail-section">
-                      <h4>Expertise</h4>
-                      <p>{reviewer.skills || "General portfolio review"}</p>
+                      <p>{reviewer.workplace}</p>
                     </div>
                     
                     <div className="detail-section">
@@ -142,11 +111,11 @@ function FindReviewer() {
                       <div className="stats-grid">
                         <div className="stat-item">
                           <span className="stat-number">{reviewCount}</span>
-                          <span className="stat-label">Portfolios Reviewed</span>
+                          <span className="stat-label">Reviews</span>
                         </div>
                         <div className="stat-item">
-                          <span className="stat-number">{reviewer.credibility || 85}</span>
-                          <span className="stat-label">Credibility Score</span>
+                          <span className="stat-number">{reviewer.credibilityScore}</span>
+                          <span className="stat-label">Rating</span>
                         </div>
                       </div>
                     </div>
@@ -185,41 +154,17 @@ function FindReviewer() {
                   <label>Select Portfolio</label>
                   <select 
                     value={selectedPortfolio}
-                    onChange={(e) => {
-                      setSelectedPortfolio(e.target.value)
-                      setSelectedVersion("")
-                    }}
+                    onChange={(e) => setSelectedPortfolio(e.target.value)}
                     className="form-select"
                   >
                     <option value="">Choose portfolio...</option>
-                    {userPortfolios.map((portfolio, index) => (
-                      <option key={index} value={portfolio.title}>
+                    {userPortfolios.map((portfolio) => (
+                      <option key={portfolio.id} value={portfolio.title}>
                         {portfolio.title}
                       </option>
                     ))}
                   </select>
                 </div>
-                
-                {selectedPortfolio && (
-                  <div className="form-group">
-                    <label>Select Version</label>
-                    <select 
-                      value={selectedVersion}
-                      onChange={(e) => setSelectedVersion(e.target.value)}
-                      className="form-select"
-                    >
-                      <option value="">Choose version...</option>
-                      {getPortfolioVersions(selectedPortfolio).map((version) => {
-                        const hasRequest = hasRequestForReviewer(selectedReviewer?.email, selectedPortfolio, version.version.toString())
-                        return (
-                          <option key={version.version} value={version.version}>
-                            Version {version.version} {hasRequest ? "(Request Sent)" : ""}
-                          </option>
-                        )
-                      })}
-                    </select>
-                  </div>
-                )}
                 
                 <div className="modal-actions">
                   <button 
@@ -228,22 +173,13 @@ function FindReviewer() {
                   >
                     Cancel
                   </button>
-                  {selectedPortfolio && selectedVersion && hasRequestForReviewer(selectedReviewer?.email, selectedPortfolio, selectedVersion) ? (
-                    <button 
-                      className="btn-sent"
-                      onClick={handleRequestReview}
-                    >
-                      Sent Review - Want to send another?
-                    </button>
-                  ) : (
-                    <button 
-                      className="btn-primary"
-                      onClick={handleRequestReview}
-                      disabled={!selectedPortfolio || !selectedVersion}
-                    >
-                      Send Request
-                    </button>
-                  )}
+                  <button 
+                    className="btn-primary"
+                    onClick={handleRequestReview}
+                    disabled={!selectedPortfolio}
+                  >
+                    Send Request
+                  </button>
                 </div>
               </div>
             </div>

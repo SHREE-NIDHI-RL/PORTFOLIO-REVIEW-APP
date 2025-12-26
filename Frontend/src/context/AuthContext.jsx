@@ -2,17 +2,23 @@ import { createContext, useState } from "react"
 
 export const AuthContext = createContext()
 
-// Default users for testing (2 owners + 3 reviewers)
+// Default users for testing (2 owners + 4 reviewers)
 const defaultUsers = [
   {
     name: "John Smith",
-    email: "owner1@example.com",
+    email: "owner@example.com",
     password: "password123",
     role: "owner"
   },
   {
-    name: "Alice Johnson",
-    email: "owner2@example.com",
+    name: "Jane Doe",
+    email: "jane.doe@example.com",
+    password: "password123",
+    role: "owner"
+  },
+  {
+    name: "Alex Smith",
+    email: "alex.smith@example.com",
     password: "password123",
     role: "owner"
   },
@@ -42,6 +48,15 @@ const defaultUsers = [
     skills: "Product Design, User Research, Figma, Adobe Creative Suite",
     workplace: "Creative Design Studio",
     qualifications: "Lead Product Designer, 6+ years experience"
+  },
+  {
+    name: "David Kumar",
+    email: "david.kumar@datatech.com",
+    password: "password123",
+    role: "reviewer",
+    skills: "AI/ML, Data Science, Python, TensorFlow",
+    workplace: "DataTech Analytics",
+    qualifications: "AI/ML Engineer, Data Science Expert"
   }
 ]
 

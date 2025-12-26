@@ -17,8 +17,27 @@ function CreatePortfolio() {
   
   const { values, handleInputChange, reset } = useForm({
     title: '',
-    description: ''
+    description: '',
+    portfolioFile: null,
+    externalLink: '',
+    domain: '',
+    experienceLevel: '',
+    openForReview: false
   })
+
+  const [uploadType, setUploadType] = useState('text') // 'text', 'file', 'link'
+
+  const domains = ['Web Development', 'Mobile Development', 'UI/UX Design', 'Graphic Design', 'Product Design', 'AI/ML', 'Data Science']
+  const experienceLevels = ['Beginner', 'Intermediate', 'Advanced', 'Expert']
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0]
+    if (file && file.type === 'application/pdf') {
+      handleInputChange({ target: { name: 'portfolioFile', value: file } })
+    } else {
+      alert('Please select a PDF file')
+    }
+  }
 
   const portfolioTips = {
     column1: [
@@ -41,10 +60,26 @@ function CreatePortfolio() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    
+    let content = values.description
+    if (uploadType === 'file' && values.portfolioFile) {
+      content = `[PDF File: ${values.portfolioFile.name}] ${values.description}`
+    } else if (uploadType === 'link' && values.externalLink) {
+      content = `[External Link: ${values.externalLink}] ${values.description}`
+    }
+    
     const portfolioData = {
       owner: user.email,
+      ownerName: user.name,
       title: values.title,
-      content: values.description
+      content: content,
+      uploadType: uploadType,
+      externalLink: uploadType === 'link' ? values.externalLink : null,
+      fileName: uploadType === 'file' && values.portfolioFile ? values.portfolioFile.name : null,
+      domain: values.domain,
+      experienceLevel: values.experienceLevel,
+      openForReview: values.openForReview,
+      private: false
     }
     addPortfolio(portfolioData)
     alert("Portfolio created successfully!")
@@ -69,15 +104,93 @@ function CreatePortfolio() {
                 className="auth-input" 
                 required
               />
+              
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Upload Type:</label>
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <input type="radio" value="text" checked={uploadType === 'text'} onChange={(e) => setUploadType(e.target.value)} />
+                    Text Description
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <input type="radio" value="file" checked={uploadType === 'file'} onChange={(e) => setUploadType(e.target.value)} />
+                    PDF Upload
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <input type="radio" value="link" checked={uploadType === 'link'} onChange={(e) => setUploadType(e.target.value)} />
+                    External Link
+                  </label>
+                </div>
+              </div>
+
+              {uploadType === 'file' && (
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Upload PDF:</label>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleFileChange}
+                    className="auth-input"
+                    required
+                  />
+                </div>
+              )}
+
+              {uploadType === 'link' && (
+                <input
+                  type="url"
+                  name="externalLink"
+                  placeholder="https://your-portfolio-link.com"
+                  value={values.externalLink}
+                  onChange={handleInputChange}
+                  className="auth-input"
+                  required
+                  style={{ marginBottom: '1rem' }}
+                />
+              )}
+              
+              <select
+                name="domain"
+                value={values.domain}
+                onChange={handleInputChange}
+                className="auth-input"
+                required
+              >
+                <option value="">Select Domain</option>
+                {domains.map(domain => (
+                  <option key={domain} value={domain}>{domain}</option>
+                ))}
+              </select>
+              <select
+                name="experienceLevel"
+                value={values.experienceLevel}
+                onChange={handleInputChange}
+                className="auth-input"
+                required
+              >
+                <option value="">Select Experience Level</option>
+                {experienceLevels.map(level => (
+                  <option key={level} value={level}>{level}</option>
+                ))}
+              </select>
               <textarea    
                 name="description"
-                placeholder="Describe your portfolio, add links, projects, etc." 
+                placeholder={uploadType === 'text' ? 'Describe your portfolio, add projects, etc.' : 'Add description or additional details...'} 
                 value={values.description}  
                 onChange={handleInputChange}  
                 className="auth-input" 
                 rows="6" 
-                required  
+                required={uploadType === 'text'}
               />
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                <input
+                  type="checkbox"
+                  name="openForReview"
+                  checked={values.openForReview}
+                  onChange={(e) => handleInputChange({ target: { name: 'openForReview', value: e.target.checked } })}
+                />
+                Make this portfolio open for public review
+              </label>
               <button type="submit" className="auth-button">Create Portfolio</button>
               <button 
                 type="button"  

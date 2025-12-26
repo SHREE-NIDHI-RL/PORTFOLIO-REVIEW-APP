@@ -1,6 +1,7 @@
 import { useContext } from "react"
 import { PortfolioContext } from "../context/PortfolioContext"
 import { AuthContext } from "../context/AuthContext"
+import { Link } from "react-router-dom"
 import OwnerNavbar from "../components/OwnerNavbar"
 import ReviewerNavbar from "../components/ReviewerNavbar"
 import UserProfile from "../components/UserProfile"
@@ -57,14 +58,26 @@ function Posts() {
                 </div>
 
                 <div className="post-content">
-                  <h3 className="portfolio-title">{post.portfolioTitle}</h3>
+                  <h3 className="portfolio-title">Portfolio: {post.portfolioTitle}</h3>
                   <p className="portfolio-description">
                     {post.portfolioContent.substring(0, 200)}...
                   </p>
                   
                   <div className="review-section">
                     <div className="reviewer-info">
-                      <strong>Reviewed by: {post.reviewerName}</strong>
+                      <strong>Reviewed by: </strong>
+                      <Link 
+                        to={`/reviewer-profile/${post.reviewerEmail}`}
+                        style={{ 
+                          color: "#007bff", 
+                          textDecoration: "none", 
+                          fontWeight: "bold" 
+                        }}
+                        onMouseOver={(e) => e.target.style.textDecoration = "underline"}
+                        onMouseOut={(e) => e.target.style.textDecoration = "none"}
+                      >
+                        {post.reviewerName}
+                      </Link>
                     </div>
                     <div className="review-feedback">
                       <p>"{post.reviewFeedback.substring(0, 150)}..."</p>

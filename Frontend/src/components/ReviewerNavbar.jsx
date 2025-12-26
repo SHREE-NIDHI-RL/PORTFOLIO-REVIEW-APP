@@ -16,6 +16,9 @@ function ReviewerNavbar() {
   const navItems = [
     { path: "/dashboard", icon: "🏠", label: "Dashboard" },
     { path: "/review-requests", icon: "📋", label: "Review Requests" },
+    { path: "/assigned-reviews", icon: "📝", label: "Assigned Reviews" },
+    { path: "/review-history", icon: "📚", label: "Review History" },
+    { path: "/portfolio-exploration", icon: "🔍", label: "Explore Portfolios" },
     { path: "/submit-review", icon: "✍️", label: "Submit Review" },
     { path: "/reviewer-profile", icon: "👤", label: "My Profile" },
     { path: "/credibility-score", icon: "🏆", label: "Credibility Score" }

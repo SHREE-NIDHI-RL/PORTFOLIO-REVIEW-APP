@@ -1,15 +1,16 @@
 import { useState, useContext } from "react"
-import { ReviewerContext } from "../context/ReviewerContext"
+import { Link } from "react-router-dom"
+import { PortfolioContext } from "../context/PortfolioContext"
 import OwnerNavbar from "../components/OwnerNavbar"
 import "../styles/SearchReviewers.css"
 
 function SearchReviewers() {
-  const { reviewers } = useContext(ReviewerContext)
+  const { reviewers } = useContext(PortfolioContext)
   const [query, setQuery] = useState("")
   const [sentRequests, setSentRequests] = useState([])
 
   const filteredReviewers = reviewers.filter((r) =>
-    r.skills.toLowerCase().includes(query.toLowerCase()) ||
+    r.qualifications.toLowerCase().includes(query.toLowerCase()) ||
     r.name.toLowerCase().includes(query.toLowerCase()) ||
     r.workplace.toLowerCase().includes(query.toLowerCase())
   )
@@ -34,7 +35,7 @@ function SearchReviewers() {
             <input 
               type="text" 
               className="search-input"
-              placeholder="Search by name, skills, or workplace..." 
+              placeholder="Search by name, qualifications, or workplace..." 
               value={query} 
               onChange={(e) => setQuery(e.target.value)} 
             />
@@ -57,12 +58,12 @@ function SearchReviewers() {
           <div className="empty-state">
             <div className="empty-state-icon">👥</div>
             <h3 className="empty-state-title">Start searching</h3>
-            <p className="empty-state-text">Enter skills, names, or workplaces to find reviewers</p>
+            <p className="empty-state-text">Enter qualifications, names, or workplaces to find reviewers</p>
           </div>
         ) : (
           <div className="reviewers-grid">
             {filteredReviewers.map((reviewer) => (
-              <div key={reviewer.id} className="reviewer-card">
+              <div key={reviewer.email} className="reviewer-card">
                 <div className="reviewer-header">
                   <div className="reviewer-avatar">
                     {reviewer.name.charAt(0).toUpperCase()}
@@ -75,20 +76,18 @@ function SearchReviewers() {
 
                 <div className="reviewer-details">
                   <div className="detail-row">
-                    <span className="detail-label">Skills:</span>
+                    <span className="detail-label">Qualifications:</span>
                     <div className="skills-tags">
-                      {reviewer.skills.split(',').map((skill, index) => (
-                        <span key={index} className="skill-tag">
-                          {skill.trim()}
-                        </span>
-                      ))}
+                      <span className="skill-tag">
+                        {reviewer.qualifications}
+                      </span>
                     </div>
                   </div>
                   
                   <div className="detail-row">
                     <span className="detail-label">Rating:</span>
                     <div className="credibility-badge">
-                      {reviewer.credibility}/5
+                      {reviewer.credibilityScore}/5
                     </div>
                   </div>
                 </div>
@@ -96,14 +95,18 @@ function SearchReviewers() {
                 <div className="reviewer-actions">
                   <button 
                     className="send-request-btn"
-                    onClick={() => sendRequest(reviewer.id)} 
-                    disabled={sentRequests.includes(reviewer.id)}
+                    onClick={() => sendRequest(reviewer.email)} 
+                    disabled={sentRequests.includes(reviewer.email)}
                   >
-                    {sentRequests.includes(reviewer.id) ? "Request Sent" : "Send Request"}
+                    {sentRequests.includes(reviewer.email) ? "Request Sent" : "Send Request"}
                   </button>
-                  <button className="view-profile-btn">
+                  <Link 
+                    to={`/reviewer-profile/${reviewer.email}`}
+                    className="view-profile-btn"
+                    style={{ textDecoration: "none", textAlign: "center" }}
+                  >
                     View Profile
-                  </button>
+                  </Link>
                 </div>
               </div>
             ))}
@@ -113,5 +116,3 @@ function SearchReviewers() {
     </div>
   )
 }
-
-export default SearchReviewers

@@ -25,6 +25,7 @@ function OwnerDashboard() {
       portfolioTitle: review.portfolioTitle,
       portfolioContent: review.portfolioContent,
       reviewerName: review.reviewerName,
+      reviewerEmail: review.reviewerEmail,
       reviewScore: review.score,
       reviewFeedback: review.feedback
     }
@@ -237,7 +238,7 @@ function OwnerDashboard() {
 
             <section className="posts-section">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                <h2 className="section-title">Recent Community Posts</h2>
+                <h2 className="section-title">Community Posts</h2>
                 <Link to="/posts" className="auth-link">View All Posts</Link>
               </div>
               {recentPosts.length > 0 ? (
@@ -252,7 +253,7 @@ function OwnerDashboard() {
                     }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                         <div>
-                          <strong>{post.authorName}</strong>
+                          <strong>Owner: {post.authorName}</strong>
                           <span style={{ marginLeft: "1rem", color: "#666" }}>
                             {new Date(post.postDate).toLocaleDateString()}
                           </span>
@@ -267,9 +268,21 @@ function OwnerDashboard() {
                           {post.reviewScore}/10
                         </span>
                       </div>
-                      <h4 style={{ margin: "0.5rem 0" }}>{post.portfolioTitle}</h4>
+                      <h4 style={{ margin: "0.5rem 0" }}>Portfolio: {post.portfolioTitle}</h4>
                       <p style={{ margin: "0.5rem 0", fontSize: "0.9rem" }}>
-                        Reviewed by <strong>{post.reviewerName}</strong>
+                        Reviewed by <Link 
+                          to={`/reviewer-profile/${post.reviewerEmail}`} 
+                          style={{ 
+                            color: "#007bff", 
+                            textDecoration: "none", 
+                            fontWeight: "bold",
+                            cursor: "pointer"
+                          }}
+                          onMouseOver={(e) => e.target.style.textDecoration = "underline"}
+                          onMouseOut={(e) => e.target.style.textDecoration = "none"}
+                        >
+                          {post.reviewerName}
+                        </Link>
                       </p>
                       <p style={{ margin: "0", fontSize: "0.85rem", color: "#666" }}>
                         "{post.reviewFeedback.substring(0, 100)}..."

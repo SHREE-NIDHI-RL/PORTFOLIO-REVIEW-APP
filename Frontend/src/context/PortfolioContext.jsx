@@ -7,8 +7,13 @@ function PortfolioProvider({ children }) {
     {
       id: 1,
       owner: "owner@example.com",
+      ownerName: "John Smith",
       title: "E-Commerce Web Application",
       content: "Built a full-stack e-commerce platform using React, Node.js, and MongoDB. Features include user authentication, product catalog, shopping cart, and payment integration with Stripe. Implemented responsive design and optimized for performance. Live demo: https://myecommerce.demo.com | GitHub: https://github.com/user/ecommerce-app",
+      domain: "Web Development",
+      experienceLevel: "Advanced",
+      openForReview: true,
+      private: false,
       createdAt: "2024-01-15T10:30:00Z",
       versions: [
         {
@@ -34,8 +39,13 @@ function PortfolioProvider({ children }) {
     {
       id: 2,
       owner: "owner@example.com",
+      ownerName: "John Smith",
       title: "Mobile Task Management App",
       content: "Developed a cross-platform mobile app using React Native for task management. Features include task creation, categorization, due dates, notifications, and team collaboration. Integrated with Firebase for real-time synchronization. Available on App Store and Google Play.",
+      domain: "Mobile Development",
+      experienceLevel: "Intermediate",
+      openForReview: true,
+      private: false,
       createdAt: "2024-02-01T09:15:00Z",
       versions: [
         {
@@ -55,8 +65,13 @@ function PortfolioProvider({ children }) {
     {
       id: 3,
       owner: "owner@example.com",
+      ownerName: "John Smith",
       title: "Data Visualization Dashboard",
       content: "Created an interactive data visualization dashboard using D3.js and React. Displays real-time analytics with charts, graphs, and interactive filters. Integrated with REST APIs for dynamic data fetching. Responsive design for desktop and mobile viewing.",
+      domain: "UI/UX Design",
+      experienceLevel: "Advanced",
+      openForReview: true,
+      private: false,
       createdAt: "2024-02-10T14:20:00Z",
       versions: [
         {
@@ -70,8 +85,13 @@ function PortfolioProvider({ children }) {
     {
       id: 4,
       owner: "owner@example.com",
+      ownerName: "John Smith",
       title: "AI-Powered Chatbot",
       content: "Developed an intelligent chatbot using Python, TensorFlow, and Natural Language Processing. Integrated with multiple platforms including web, Slack, and Discord. Features include intent recognition, context awareness, and learning capabilities.",
+      domain: "AI/ML",
+      experienceLevel: "Expert",
+      openForReview: false,
+      private: true,
       createdAt: "2024-02-15T10:00:00Z",
       versions: [
         {
@@ -81,9 +101,84 @@ function PortfolioProvider({ children }) {
           reviews: []
         }
       ]
+    },
+    {
+      id: 5,
+      owner: "jane.doe@example.com",
+      ownerName: "Jane Doe",
+      title: "Portfolio Website Design",
+      content: "Designed and developed a responsive portfolio website using HTML5, CSS3, and JavaScript. Features include smooth animations, interactive elements, and optimized performance. Showcases various design projects with detailed case studies.",
+      domain: "Web Development",
+      experienceLevel: "Beginner",
+      openForReview: true,
+      private: false,
+      createdAt: "2024-02-20T11:00:00Z",
+      versions: [
+        {
+          version: 1,
+          content: "Responsive portfolio website with HTML5, CSS3, and JavaScript featuring smooth animations and interactive elements.",
+          createdAt: "2024-02-20T11:00:00Z",
+          reviews: []
+        }
+      ]
+    },
+    {
+      id: 6,
+      owner: "alex.smith@example.com",
+      ownerName: "Alex Smith",
+      title: "Social Media Analytics Tool",
+      content: "Built a comprehensive social media analytics tool using React, Python Flask, and PostgreSQL. Features include data collection from multiple platforms, sentiment analysis, and interactive reporting dashboards.",
+      domain: "Web Development",
+      experienceLevel: "Advanced",
+      openForReview: true,
+      private: false,
+      createdAt: "2024-02-22T14:30:00Z",
+      versions: [
+        {
+          version: 1,
+          content: "Social media analytics tool with React, Python Flask, and PostgreSQL for multi-platform data analysis.",
+          createdAt: "2024-02-22T14:30:00Z",
+          reviews: []
+        }
+      ]
     }
   ])
   
+  const [reviewers] = useState([
+    {
+      name: "Dr. Sarah Johnson",
+      email: "sarah.johnson@techcorp.com",
+      workplace: "TechCorp Solutions",
+      qualifications: "PhD in Computer Science, 10+ years UX/UI experience",
+      credibilityScore: 4.8,
+      reviews: []
+    },
+    {
+      name: "Michael Chen",
+      email: "michael.chen@innovate.com",
+      workplace: "Innovate Design Studio",
+      qualifications: "Senior Mobile Developer, React Native Expert",
+      credibilityScore: 4.6,
+      reviews: []
+    },
+    {
+      name: "Emily Rodriguez",
+      email: "emily.rodriguez@designstudio.com",
+      workplace: "Creative Design Studio",
+      qualifications: "Senior UX Designer, Design Systems Specialist",
+      credibilityScore: 4.7,
+      reviews: []
+    },
+    {
+      name: "David Kumar",
+      email: "david.kumar@datatech.com",
+      workplace: "DataTech Analytics",
+      qualifications: "AI/ML Engineer, Data Science Expert",
+      credibilityScore: 4.9,
+      reviews: []
+    }
+  ])
+
   const [posts, setPosts] = useState([
     {
       id: 1,
@@ -92,6 +187,7 @@ function PortfolioProvider({ children }) {
       portfolioTitle: "E-Commerce Web Application",
       portfolioContent: "Built a full-stack e-commerce platform using React, Node.js, and MongoDB. Features include user authentication, product catalog, shopping cart, and payment integration with Stripe.",
       reviewerName: "Dr. Sarah Johnson",
+      reviewerEmail: "sarah.johnson@techcorp.com",
       reviewScore: 8.5,
       reviewFeedback: "Excellent technical implementation! The code structure is clean and well-organized. The UI/UX is intuitive and responsive.",
       postDate: "2024-01-28T10:30:00Z",
@@ -105,6 +201,7 @@ function PortfolioProvider({ children }) {
       portfolioTitle: "Mobile Task Management App",
       portfolioContent: "Developed a cross-platform mobile app using React Native for task management. Features include task creation, categorization, due dates, notifications, and team collaboration.",
       reviewerName: "Michael Chen",
+      reviewerEmail: "michael.chen@innovate.com",
       reviewScore: 9.0,
       reviewFeedback: "Outstanding mobile development work! The app is well-structured with excellent performance across both iOS and Android platforms.",
       postDate: "2024-02-08T14:20:00Z",
@@ -116,6 +213,7 @@ function PortfolioProvider({ children }) {
   const [reviewRequests, setReviewRequests] = useState([
     {
       id: 1,
+      portfolioId: 1,
       reviewerEmail: "sarah.johnson@techcorp.com",
       reviewerName: "Dr. Sarah Johnson",
       ownerEmail: "owner@example.com",
@@ -126,10 +224,11 @@ function PortfolioProvider({ children }) {
       requestDate: "2024-01-25T10:00:00Z",
       reviewDate: "2024-01-27T15:30:00Z",
       score: 8.5,
-      feedback: "Excellent technical implementation! The code structure is clean and well-organized. The UI/UX is intuitive and responsive. The e-commerce functionality is comprehensive with proper error handling. Consider adding more comprehensive unit tests and implementing caching for better performance. Overall, this is a solid full-stack project that demonstrates strong development skills."
+      feedback: "STRENGTHS:\nExcellent technical implementation! The code structure is clean and well-organized. The UI/UX is intuitive and responsive. The e-commerce functionality is comprehensive with proper error handling.\n\nWEAKNESSES:\nLimited unit test coverage. Performance could be improved with caching mechanisms. Some components could be better optimized for mobile devices.\n\nSUGGESTIONS FOR IMPROVEMENT:\nConsider adding more comprehensive unit tests and implementing caching for better performance. Add more mobile-specific optimizations and consider implementing lazy loading for images."
     },
     {
       id: 2,
+      portfolioId: 2,
       reviewerEmail: "michael.chen@innovate.com",
       reviewerName: "Michael Chen",
       ownerEmail: "owner@example.com",
@@ -140,69 +239,41 @@ function PortfolioProvider({ children }) {
       requestDate: "2024-02-05T11:20:00Z",
       reviewDate: "2024-02-07T16:45:00Z",
       score: 9.0,
-      feedback: "Outstanding mobile development work! The app is well-structured with excellent performance across both iOS and Android platforms. The Firebase integration is seamless and the real-time synchronization works flawlessly. Great attention to user experience and cross-platform compatibility. The code is clean and follows React Native best practices."
+      feedback: "STRENGTHS:\nOutstanding mobile development work! The app is well-structured with excellent performance across both iOS and Android platforms. The Firebase integration is seamless and the real-time synchronization works flawlessly.\n\nWEAKNESSES:\nUser onboarding could be more intuitive. Some advanced features are not easily discoverable. Limited customization options for task categories.\n\nSUGGESTIONS FOR IMPROVEMENT:\nAdd a comprehensive onboarding flow with interactive tutorials. Implement better feature discovery mechanisms and add more customization options for power users."
     },
     {
       id: 3,
+      portfolioId: 3,
       reviewerEmail: "emily.rodriguez@designstudio.com",
       reviewerName: "Emily Rodriguez",
       ownerEmail: "owner@example.com",
       ownerName: "John Smith",
       portfolioTitle: "Data Visualization Dashboard",
       portfolioContent: "Created an interactive data visualization dashboard using D3.js and React. Displays real-time analytics with charts, graphs, and interactive filters.",
-      status: "completed",
-      requestDate: "2024-02-12T09:00:00Z",
-      reviewDate: "2024-02-14T14:20:00Z",
-      score: 8.8,
-      feedback: "Impressive data visualization work! The D3.js integration with React is expertly handled. The interactive elements are smooth and the design is both functional and aesthetically pleasing. The dashboard provides excellent user experience with intuitive navigation. Consider adding more accessibility features and keyboard navigation support."
+      status: "accepted",
+      requestDate: "2024-02-12T09:00:00Z"
     },
     {
       id: 4,
-      reviewerEmail: "david.kumar@datatech.com",
-      reviewerName: "David Kumar",
-      ownerEmail: "owner@example.com",
-      ownerName: "John Smith",
-      portfolioTitle: "AI-Powered Chatbot",
-      portfolioContent: "Developed an intelligent chatbot using Python, TensorFlow, and Natural Language Processing. Integrated with multiple platforms including web, Slack, and Discord.",
-      status: "completed",
-      requestDate: "2024-02-16T13:30:00Z",
-      reviewDate: "2024-02-18T10:15:00Z",
-      score: 9.2,
-      feedback: "Exceptional AI implementation! The natural language processing is sophisticated and the chatbot responses are contextually accurate. The multi-platform integration is seamless. The machine learning model shows good training and the code architecture is scalable. This demonstrates advanced understanding of AI/ML concepts and practical implementation skills."
-    },
-    {
-      id: 5,
+      portfolioId: 5,
       reviewerEmail: "sarah.johnson@techcorp.com",
       reviewerName: "Dr. Sarah Johnson",
-      ownerEmail: "owner@example.com",
-      ownerName: "John Smith",
-      portfolioTitle: "Mobile Task Management App",
-      portfolioContent: "Developed a cross-platform mobile app using React Native for task management.",
-      status: "completed",
-      requestDate: "2024-02-20T08:45:00Z",
-      reviewDate: "2024-02-22T11:30:00Z",
-      score: 8.7,
-      feedback: "Great mobile app development! The React Native implementation is solid and the user interface is clean and intuitive. The task management features are well thought out and the app performance is smooth. Good use of modern mobile development practices."
-    },
-    {
-      id: 6,
-      reviewerEmail: "emily.rodriguez@designstudio.com",
-      reviewerName: "Emily Rodriguez",
-      ownerEmail: "owner@example.com",
-      ownerName: "John Smith",
-      portfolioTitle: "E-Commerce Web Application",
-      portfolioContent: "Built a full-stack e-commerce platform using React, Node.js, and MongoDB.",
+      ownerEmail: "jane.doe@example.com",
+      ownerName: "Jane Doe",
+      portfolioTitle: "Portfolio Website Design",
+      portfolioContent: "Designed and developed a responsive portfolio website using HTML5, CSS3, and JavaScript. Features include smooth animations, interactive elements, and optimized performance.",
       status: "pending",
       requestDate: "2024-02-24T14:30:00Z"
     },
     {
-      id: 7,
-      reviewerEmail: "sarah.johnson@techcorp.com",
-      reviewerName: "Dr. Sarah Johnson",
-      ownerEmail: "owner@example.com",
-      ownerName: "John Smith",
-      portfolioTitle: "Data Visualization Dashboard",
-      portfolioContent: "Created an interactive data visualization dashboard using D3.js and React. Displays real-time analytics with charts, graphs, and interactive filters.",
+      id: 5,
+      portfolioId: 6,
+      reviewerEmail: "david.kumar@datatech.com",
+      reviewerName: "David Kumar",
+      ownerEmail: "alex.smith@example.com",
+      ownerName: "Alex Smith",
+      portfolioTitle: "Social Media Analytics Tool",
+      portfolioContent: "Built a comprehensive social media analytics tool using React, Python Flask, and PostgreSQL. Features include data collection from multiple platforms, sentiment analysis, and interactive reporting dashboards.",
       status: "pending",
       requestDate: "2024-02-25T09:15:00Z"
     }
@@ -242,12 +313,33 @@ function PortfolioProvider({ children }) {
     const newRequest = {
       ...request,
       id: Date.now(),
-      ownerProfile: {
-        name: request.ownerName,
-        email: request.ownerEmail
-      }
+      requestDate: new Date().toISOString(),
+      status: "pending"
     }
     setReviewRequests([...reviewRequests, newRequest])
+  }
+
+  const sendReviewRequest = (portfolioId, reviewerEmail, message = "") => {
+    const portfolio = portfolios.find(p => p.id === portfolioId)
+    const reviewer = reviewers.find(r => r.email === reviewerEmail)
+    
+    if (portfolio && reviewer) {
+      const request = {
+        portfolioId: portfolioId,
+        portfolioTitle: portfolio.title,
+        portfolioContent: portfolio.content,
+        ownerEmail: portfolio.owner,
+        ownerName: portfolio.ownerName,
+        reviewerEmail: reviewer.email,
+        reviewerName: reviewer.name,
+        message: message,
+        status: "pending",
+        requestDate: new Date().toISOString()
+      }
+      addReviewRequest(request)
+      return true
+    }
+    return false
   }
 
   const submitReview = (requestId, reviewData) => {
@@ -262,6 +354,13 @@ function PortfolioProvider({ children }) {
           } 
         : req
     ))
+    
+    // Update reviewer credibility
+    const request = reviewRequests.find(req => req.id === requestId)
+    if (request) {
+      const newCredibility = updateCredibilityScore(request.reviewerEmail)
+      console.log(`Updated credibility for ${request.reviewerEmail}: ${newCredibility}`)
+    }
   }
 
   const addPost = (postData) => {
@@ -281,17 +380,25 @@ function PortfolioProvider({ children }) {
     ))
   }
 
+  const getReviewerByEmail = (email) => {
+    return reviewers.find(reviewer => reviewer.email === email)
+  }
+
   return (
     <PortfolioContext.Provider value={{ 
       portfolios, 
       reviewRequests,
       posts,
+      reviewers,
       addPortfolio, 
       addVersion, 
-      addReviewRequest, 
+      addReviewRequest,
+      sendReviewRequest, 
       updateRequestStatus,
       submitReview,
-      addPost
+      addPost,
+      getReviewerByEmail,
+      updateCredibilityScore
     }}>
       {children}
     </PortfolioContext.Provider>

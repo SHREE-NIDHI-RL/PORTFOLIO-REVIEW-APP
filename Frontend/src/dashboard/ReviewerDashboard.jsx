@@ -1,4 +1,4 @@
-import { useContext } from "react"
+import { useContext, useState } from "react"
 import { AuthContext } from "../context/AuthContext"
 import { PortfolioContext } from "../context/PortfolioContext"
 import { Link } from "react-router-dom"
@@ -8,11 +8,19 @@ import "../styles/ReviewerDashboard.css"
 
 function ReviewerDashboard() {
   const { user } = useContext(AuthContext)
-  const { reviewRequests, updateRequestStatus, posts } = useContext(PortfolioContext)
+  const { reviewRequests, updateRequestStatus, posts, portfolios, addReviewRequest } = useContext(PortfolioContext)
+  const [selectedPortfolio, setSelectedPortfolio] = useState(null)
   
   const pendingRequests = reviewRequests.filter(req => 
     req.reviewerEmail === user?.email && req.status === "pending"
   )
+  const acceptedRequests = reviewRequests.filter(req => 
+    req.reviewerEmail === user?.email && req.status === "accepted"
+  )
+  const completedReviews = reviewRequests.filter(req => 
+    req.reviewerEmail === user?.email && req.status === "completed"
+  )
+  const openPortfolios = portfolios.filter(p => p.openForReview && !p.private)
   const recentPosts = posts.slice(0, 3)
 
   const handleAcceptRequest = (requestId) => {
@@ -25,108 +33,267 @@ function ReviewerDashboard() {
     alert("Request rejected.")
   }
 
-  const reviewerActions = [
-    {
-      title: "Review Requests",
-      link: "/review-requests",
-      description: "View and manage incoming portfolio review requests"
-    },
-    {
-      title: "Submit Review",
-      link: "/submit-review", 
-      description: "Provide detailed feedback and scores for portfolios"
-    },
-    {
-      title: "My Profile",
-      link: "/reviewer-profile",
-      description: "Manage your professional reviewer profile and credentials"
-    },
-    {
-      title: "Credibility Score",
-      link: "/credibility-score",
-      description: "Track your reviewer reputation and performance metrics"
-    }
-  ]
+  const handleViewPortfolio = (portfolio) => {
+    setSelectedPortfolio(portfolio)
+  }
 
   return (
     <>
       <ReviewerNavbar />
       <UserProfile />
       <div className="dashboard-with-navbar">
-        <div className="reviewer-dashboard-wrapper">
-          <div className="reviewer-dashboard-main">
-            <div className="reviewer-dashboard-header">
-              <h1 className="reviewer-dashboard-title">Review Hub</h1>
-              <div className="reviewer-info">
-                <div className="reviewer-detail">
-                  <strong>{user?.name}</strong>
-                </div>
-                <div className="reviewer-detail">
-                  {user?.qualifications}
-                </div>
-                <div className="reviewer-detail">
-                  {user?.workplace}
-                </div>
-              </div>
-            </div>
+        <div className="reviewer-dashboard">
+          <div className="dashboard-header">
+            <h1 className="dashboard-title">Reviewer Dashboard</h1>
+          </div>
 
-            <div className="reviewer-actions-section">
-              <h2 className="reviewer-actions-title">Reviewer Actions</h2>
-              <ul className="reviewer-actions-grid">
-                {reviewerActions.map((action, index) => (
-                  <li key={index} className="reviewer-action-card">
-                    <Link to={action.link} className="capability-link">
-                      {action.title}
-                    </Link>
-                    <p className="capability-description">
-                      {action.description}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {pendingRequests.length > 0 && (
-              <div className="pending-requests-section">
-                <h2 className="pending-requests-title">Pending Review Requests</h2>
+          <div className="dashboard-content">
+            {/* Review Requests Inbox */}
+            <section className="requests-section">
+              <h2 className="section-title">Review Requests Inbox</h2>
+              {pendingRequests.length > 0 ? (
                 <div className="requests-grid">
                   {pendingRequests.map((request) => (
-                    <div key={request.id} className="request-card">
-                      <div className="request-header">
-                        <h3>From: {request.ownerName}</h3>
-                        <span className="request-date">
-                          {new Date(request.requestDate).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <div className="request-details">
-                        <h4>Portfolio: {request.portfolioTitle}</h4>
-                        <p className="portfolio-preview">
-                          {request.portfolioContent.substring(0, 150)}...
-                        </p>
-                      </div>
-                      <div className="request-actions">
-                        <button 
-                          onClick={() => handleAcceptRequest(request.id)}
-                          className="accept-btn"
-                        >
-                          Accept
-                        </button>
-                        <button 
-                          onClick={() => handleRejectRequest(request.id)}
-                          className="reject-btn"
-                        >
-                          Reject
-                        </button>
+                    <div key={request.id} className="request-item">
+                      <div className="request-content">
+                        <div className="request-info">
+                          <h3 className="request-title">{request.portfolioTitle}</h3>
+                          <p className="request-meta">
+                            Owner: {request.ownerName} • Version 1.0 • Pending
+                          </p>
+                          <div className="request-tags">
+                            <span className="domain-tag">
+                              {request.portfolioTitle.includes('UX') ? 'UI/UX Design' : 
+                               request.portfolioTitle.includes('Web') ? 'Web Development' :
+                               request.portfolioTitle.includes('Mobile') ? 'Mobile Development' : 'Design'}
+                            </span>
+                            <span className="status-tag status-pending">
+                              Status: Pending
+                            </span>
+                          </div>
+                          <div className="request-actions">
+                            <button 
+                              onClick={() => handleAcceptRequest(request.id)}
+                              className="action-btn primary"
+                            >
+                              Accept Request
+                            </button>
+                            <button 
+                              onClick={() => handleRejectRequest(request.id)}
+                              className="action-btn secondary"
+                            >
+                              Reject Request
+                            </button>
+                          </div>
+                        </div>
+                        <div className="request-preview">
+                          <div className="portfolio-preview">
+                            {(request.portfolioContent || '').substring(0, 150)}...
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
+              ) : (
+                <div style={{ textAlign: "center", padding: "2rem" }}>
+                  <p>No pending review requests.</p>
+                </div>
+              )}
+            </section>
+
+            {/* Assigned/Accepted Reviews */}
+            <section className="assigned-section">
+              <h2 className="section-title">Assigned Reviews</h2>
+              {acceptedRequests.length > 0 ? (
+                <div className="assigned-grid">
+                  {acceptedRequests.map((request) => (
+                    <div key={request.id} className="assigned-item">
+                      <div className="assigned-content">
+                        <div className="assigned-info">
+                          <h3 className="assigned-title">{request.portfolioTitle}</h3>
+                          <p className="assigned-meta">
+                            Owner: {request.ownerName} • Version 1.0 • Accepted
+                          </p>
+                          <div className="assigned-tags">
+                            <span className="domain-tag">
+                              {request.portfolioTitle.includes('UX') ? 'UI/UX Design' : 
+                               request.portfolioTitle.includes('Web') ? 'Web Development' :
+                               request.portfolioTitle.includes('Mobile') ? 'Mobile Development' : 'Design'}
+                            </span>
+                            <span className="status-tag status-accepted">
+                              Status: Accepted
+                            </span>
+                          </div>
+                          <div className="assigned-actions">
+                            <button 
+                              onClick={() => handleViewPortfolio(request)}
+                              className="action-btn primary"
+                            >
+                              View Portfolio
+                            </button>
+                            <Link 
+                              to={`/submit-review?requestId=${request.id}`}
+                              className="action-btn secondary"
+                              style={{ textDecoration: 'none', textAlign: 'center' }}
+                            >
+                              Submit Review
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: "center", padding: "2rem" }}>
+                  <p>No assigned reviews.</p>
+                </div>
+              )}
+            </section>
+
+            {/* Review History */}
+            <section className="history-section">
+              <h2 className="section-title">Review History</h2>
+              {completedReviews.length > 0 ? (
+                <div className="history-list">
+                  {completedReviews.map(review => (
+                    <div key={review.id} className="history-item">
+                      <div className="reviewer-avatar">
+                        {review.portfolioTitle.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="history-content">
+                        <div className="history-header">
+                          <div className="history-info">
+                            <span className="history-title">{review.portfolioTitle}</span>
+                            <span className="history-meta">Score: {review.score}/10 • Version 1.0</span>
+                          </div>
+                          <span className="history-date">
+                            {new Date(review.reviewDate).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div className="history-body">
+                          <p className="history-feedback">
+                            "{(review.feedback || '').substring(0, 100)}..."
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: "center", padding: "2rem" }}>
+                  <p>No completed reviews yet.</p>
+                </div>
+              )}
+            </section>
+
+            {/* Portfolio Exploration */}
+            <section className="exploration-section">
+              <h2 className="section-title">Portfolio Exploration</h2>
+              {openPortfolios.length > 0 ? (
+                <div className="exploration-grid">
+                  {openPortfolios.slice(0, 6).map((portfolio) => (
+                    <div key={portfolio.id} className="exploration-item">
+                      <div className="exploration-content">
+                        <div className="exploration-info">
+                          <h3 className="exploration-title">{portfolio.title}</h3>
+                          <p className="exploration-meta">
+                            Owner: {portfolio.ownerName} • Open for Review
+                          </p>
+                          <div className="exploration-tags">
+                            <span className="domain-tag">
+                              {portfolio.domain || 'General'}
+                            </span>
+                            <span className="level-tag">
+                              {portfolio.experienceLevel || 'Intermediate'}
+                            </span>
+                          </div>
+                          <div className="exploration-actions">
+                            <button 
+                              onClick={() => handleViewPortfolio(portfolio)}
+                              className="action-btn primary"
+                            >
+                              View Portfolio
+                            </button>
+                            <button 
+                              onClick={() => {
+                                const reviewRequest = {
+                                  portfolioId: portfolio.id,
+                                  portfolioTitle: portfolio.title,
+                                  portfolioContent: portfolio.content,
+                                  ownerName: portfolio.ownerName,
+                                  ownerEmail: portfolio.owner,
+                                  reviewerName: user.name,
+                                  reviewerEmail: user.email,
+                                  requestDate: new Date().toISOString(),
+                                  status: "pending"
+                                }
+                                addReviewRequest(reviewRequest)
+                                alert("Review request sent!")
+                              }}
+                              className="action-btn secondary"
+                            >
+                              Request to Review
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: "center", padding: "2rem" }}>
+                  <p>No portfolios open for review.</p>
+                </div>
+              )}
+            </section>
+
+            {/* Portfolio View Modal */}
+            {selectedPortfolio && (
+              <div className="portfolio-modal">
+                <div className="portfolio-modal-content">
+                  <div className="modal-header">
+                    <h2 className="modal-title">{selectedPortfolio.portfolioTitle || selectedPortfolio.title}</h2>
+                    <button 
+                      className="close-btn"
+                      onClick={() => setSelectedPortfolio(null)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                  
+                  <div className="modal-body">
+                    <div className="portfolio-details">
+                      <p><strong>Owner:</strong> {selectedPortfolio.ownerName || selectedPortfolio.owner}</p>
+                      <p><strong>Version:</strong> 1.0</p>
+                      <p><strong>Domain:</strong> {selectedPortfolio.domain || 'General'}</p>
+                    </div>
+                    
+                    <div className="portfolio-content-view">
+                      <h4>Portfolio Content:</h4>
+                      <div className="content-preview">
+                        {selectedPortfolio.portfolioContent || selectedPortfolio.content || 'Portfolio content will be displayed here in read-only mode.'}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="modal-footer">
+                    <button 
+                      onClick={() => setSelectedPortfolio(null)}
+                      className="action-btn secondary"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 
+            {/* Community Posts */}
             <section className="posts-section">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                <h2 className="section-title">Recent Community Posts</h2>
+                <h2 className="section-title">Community Posts</h2>
                 <Link to="/posts" className="auth-link">View All Posts</Link>
               </div>
               {recentPosts.length > 0 ? (
@@ -141,7 +308,7 @@ function ReviewerDashboard() {
                     }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                         <div>
-                          <strong>{post.authorName}</strong>
+                          <strong>Owner: {post.authorName}</strong>
                           <span style={{ marginLeft: "1rem", color: "#666" }}>
                             {new Date(post.postDate).toLocaleDateString()}
                           </span>
@@ -156,9 +323,21 @@ function ReviewerDashboard() {
                           {post.reviewScore}/10
                         </span>
                       </div>
-                      <h4 style={{ margin: "0.5rem 0" }}>{post.portfolioTitle}</h4>
+                      <h4 style={{ margin: "0.5rem 0" }}>Portfolio: {post.portfolioTitle}</h4>
                       <p style={{ margin: "0.5rem 0", fontSize: "0.9rem" }}>
-                        Reviewed by <strong>{post.reviewerName}</strong>
+                        Reviewed by <Link 
+                          to={`/reviewer-profile/${post.reviewerEmail}`} 
+                          style={{ 
+                            color: "#007bff", 
+                            textDecoration: "none", 
+                            fontWeight: "bold",
+                            cursor: "pointer"
+                          }}
+                          onMouseOver={(e) => e.target.style.textDecoration = "underline"}
+                          onMouseOut={(e) => e.target.style.textDecoration = "none"}
+                        >
+                          {post.reviewerName}
+                        </Link>
                       </p>
                       <p style={{ margin: "0", fontSize: "0.85rem", color: "#666" }}>
                         "{post.reviewFeedback.substring(0, 100)}..."
