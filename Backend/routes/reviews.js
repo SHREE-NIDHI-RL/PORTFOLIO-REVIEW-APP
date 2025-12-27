@@ -3,6 +3,7 @@ const { body, validationResult } = require('express-validator');
 const Review = require('../models/Review');
 const Portfolio = require('../models/Portfolio');
 const Post = require('../models/Post');
+const User = require('../models/User');
 const auth = require('../middleware/auth');
 
 const router = express.Router();

@@ -58,7 +58,7 @@ function CreatePortfolio() {
     { name: "PowerPoint", icon: "📊", url: "https://www.office.com/launch/powerpoint" }
   ]
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     let content = values.description
@@ -69,8 +69,6 @@ function CreatePortfolio() {
     }
     
     const portfolioData = {
-      owner: user.email,
-      ownerName: user.name,
       title: values.title,
       content: content,
       uploadType: uploadType,
@@ -81,10 +79,15 @@ function CreatePortfolio() {
       openForReview: values.openForReview,
       private: false
     }
-    addPortfolio(portfolioData)
-    alert("Portfolio created successfully!")
-    reset()
-    navigate("/saved-portfolios")
+    
+    try {
+      await addPortfolio(portfolioData)
+      alert("Portfolio created successfully!")
+      reset()
+      navigate("/saved-portfolios")
+    } catch (error) {
+      alert("Error creating portfolio: " + error.message)
+    }
   }
 
   if (showForm) {

@@ -1,6 +1,5 @@
 import { useState, useContext } from "react"
 import { AuthContext } from "../context/AuthContext"
-import { ReviewerContext } from "../context/ReviewerContext"
 import { useNavigate, Link } from "react-router-dom"
 import "../styles/auth.css"
 

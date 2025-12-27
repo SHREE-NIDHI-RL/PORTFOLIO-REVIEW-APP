@@ -25,9 +25,8 @@ function Login() {
         throw new Error("Please fill in all fields")
       }
       
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      const loginSuccess = login(email, password, role)
+
+      const loginSuccess = await login(email, password, role)
       if (!loginSuccess) {
         throw new Error("Invalid credentials")
       }

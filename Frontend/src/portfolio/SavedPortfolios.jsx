@@ -13,24 +13,32 @@ function SavedPortfolios() {
   const [showVersionModal, setShowVersionModal] = useState(false)
   const [newVersionContent, setNewVersionContent] = useState("")
 
-  const handleMakeAvailable = (portfolioId, versionNum) => {
-    updatePortfolioVisibility(portfolioId, versionNum, true)
-    alert("Portfolio version made available for all reviewers!")
+  const handleMakeAvailable = async (portfolioId, versionNum) => {
+    try {
+      await updatePortfolioVisibility(portfolioId, versionNum, true)
+      alert("Portfolio version made available for all reviewers!")
+    } catch (error) {
+      alert("Error updating visibility: " + error.message)
+    }
   }
 
-  const userPortfolios = portfolios.filter(p => p.owner === user?.email)
+  const userPortfolios = portfolios.filter(p => p.owner === user?.id || p.owner === user?.email)
 
-  const handleAddVersion = (portfolioId) => {
+  const handleAddVersion = async (portfolioId) => {
     if (newVersionContent.trim()) {
-      addVersion(portfolioId, newVersionContent)
-      setNewVersionContent("")
-      setShowVersionModal(false)
-      alert("New version added successfully!")
+      try {
+        await addVersion(portfolioId, newVersionContent)
+        setNewVersionContent("")
+        setShowVersionModal(false)
+        alert("New version added successfully!")
+      } catch (error) {
+        alert("Error adding version: " + error.message)
+      }
     }
   }
 
   const portfolios_display = userPortfolios.map((portfolio) => ({
-    id: portfolio.id,
+    id: portfolio._id || portfolio.id,
     title: portfolio.title,
     version: portfolio.versions?.length || 1,
     status: portfolio.uploadType === 'file' ? 'PDF Uploaded' : portfolio.uploadType === 'link' ? 'External Link' : 'Draft',
