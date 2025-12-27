@@ -13,10 +13,14 @@ function PortfolioExploration() {
     experienceLevel: ''
   })
 
-  // Filter portfolios that are open for review and not private
-  const openPortfolios = portfolios.filter(p => p.openForReview && !p.private)
+  // Filter portfolios that are made available for all reviewers
+  const publicPortfolios = portfolios.filter(p => {
+    // Check if any version is marked as public for reviewers
+    const hasPublicVersion = p.versions?.some(v => v.publicForReviewers) || false
+    return hasPublicVersion
+  })
 
-  const filteredPortfolios = openPortfolios.filter(portfolio => {
+  const filteredPortfolios = publicPortfolios.filter(portfolio => {
     const domainMatch = !filters.domain || 
       (portfolio.domain && portfolio.domain.toLowerCase().includes(filters.domain.toLowerCase())) ||
       (portfolio.title && portfolio.title.toLowerCase().includes(filters.domain.toLowerCase()))

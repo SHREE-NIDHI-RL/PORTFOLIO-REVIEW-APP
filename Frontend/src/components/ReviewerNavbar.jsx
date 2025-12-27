@@ -20,8 +20,7 @@ function ReviewerNavbar() {
     { path: "/review-history", icon: "📚", label: "Review History" },
     { path: "/portfolio-exploration", icon: "🔍", label: "Explore Portfolios" },
     { path: "/submit-review", icon: "✍️", label: "Submit Review" },
-    { path: "/reviewer-profile", icon: "👤", label: "My Profile" },
-    { path: "/credibility-score", icon: "🏆", label: "Credibility Score" }
+    { path: "/reviewer-profile", icon: "👤", label: "My Profile" }
   ]
 
   return (

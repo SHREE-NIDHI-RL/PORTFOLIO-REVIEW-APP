@@ -7,10 +7,16 @@ import "../styles/OwnerDashboard.css"
 
 function SavedPortfolios() {
   const { user } = useContext(AuthContext)
-  const { portfolios, addVersion } = useContext(PortfolioContext)
+  const { portfolios, addVersion, updatePortfolioVisibility } = useContext(PortfolioContext)
   const [selectedPortfolio, setSelectedPortfolio] = useState(null)
+  const [selectedVersion, setSelectedVersion] = useState(null)
   const [showVersionModal, setShowVersionModal] = useState(false)
   const [newVersionContent, setNewVersionContent] = useState("")
+
+  const handleMakeAvailable = (portfolioId, versionNum) => {
+    updatePortfolioVisibility(portfolioId, versionNum, true)
+    alert("Portfolio version made available for all reviewers!")
+  }
 
   const userPortfolios = portfolios.filter(p => p.owner === user?.email)
 
@@ -50,9 +56,18 @@ function SavedPortfolios() {
 
         <div className="dashboard-content">
           <section className="portfolios-section">
-            <h2 className="section-title">Saved Portfolios</h2>
-            <div className="portfolios-grid">
-              {portfolios_display.map(portfolio => (
+            <h2 className="section-title">Saved Portfolios ({userPortfolios.length})</h2>
+            {userPortfolios.length === 0 ? (
+              <div className="no-portfolios" style={{ padding: '2rem', textAlign: 'center', background: '#f8f9fa', borderRadius: '8px' }}>
+                <h3>No portfolios found</h3>
+                <p>Create your first portfolio to get started</p>
+                <Link to="/create-portfolio" className="create-new-btn" style={{ display: 'inline-block', marginTop: '1rem' }}>
+                  Create Portfolio
+                </Link>
+              </div>
+            ) : (
+              <div className="portfolios-grid">
+                {portfolios_display.map(portfolio => (
                 <div key={portfolio.id} className="portfolio-item">
                   <div className="portfolio-content">
                     <div className="portfolio-info">
@@ -98,7 +113,8 @@ function SavedPortfolios() {
                   </div>
                 </div>
               ))}
-            </div>
+              </div>
+            )}
           </section>
         </div>
 
@@ -106,19 +122,83 @@ function SavedPortfolios() {
           <div className="feedback-modal">
             <div className="feedback-card">
               <div className="review-card-header">
-                <h2 className="review-card-title">{selectedPortfolio.title} - Versions</h2>
+                <h2 className="review-card-title">{selectedPortfolio.title} - Portfolio Versions</h2>
                 <button onClick={() => setSelectedPortfolio(null)} className="close-btn">×</button>
               </div>
               <div style={{ padding: "1.5rem" }}>
-                {(selectedPortfolio.versions || [{version: 1, content: selectedPortfolio.content, createdAt: selectedPortfolio.createdAt}]).map(version => (
-                  <div key={version.version} style={{ marginBottom: "1.5rem", padding: "1rem", background: "#f8f9fa", borderRadius: "8px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                      <h4>Version {version.version}</h4>
-                      <span style={{ color: "#666", fontSize: "0.9rem" }}>{new Date(version.createdAt).toLocaleDateString()}</span>
+                <div style={{ marginBottom: "1rem" }}>
+                  <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold" }}>Select Version to View:</label>
+                  <select 
+                    style={{ 
+                      width: "100%", 
+                      padding: "0.5rem", 
+                      border: "1px solid #ddd", 
+                      borderRadius: "4px",
+                      marginBottom: "1rem"
+                    }}
+                    onChange={(e) => {
+                      const versionNum = parseInt(e.target.value)
+                      const version = selectedPortfolio.versions?.find(v => v.version === versionNum) || 
+                                    {version: 1, content: selectedPortfolio.content, createdAt: selectedPortfolio.createdAt}
+                      setSelectedVersion(version)
+                    }}
+                  >
+                    {(selectedPortfolio.versions || [{version: 1, content: selectedPortfolio.content, createdAt: selectedPortfolio.createdAt}]).map(version => (
+                      <option key={version.version} value={version.version}>
+                        Version {version.version} - {new Date(version.createdAt).toLocaleDateString()} {new Date(version.createdAt).toLocaleTimeString()}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                {selectedVersion && (
+                  <div style={{ 
+                    padding: "1.5rem", 
+                    background: "#f8f9fa", 
+                    borderRadius: "8px",
+                    border: "1px solid #e9ecef"
+                  }}>
+                    <div style={{ 
+                      display: "flex", 
+                      justifyContent: "space-between", 
+                      alignItems: "center",
+                      marginBottom: "1rem",
+                      paddingBottom: "0.5rem",
+                      borderBottom: "1px solid #dee2e6"
+                    }}>
+                      <h4 style={{ margin: 0, color: "#495057" }}>Version {selectedVersion.version}</h4>
+                      <div style={{ fontSize: "0.9rem", color: "#6c757d" }}>
+                        <div>📅 {new Date(selectedVersion.createdAt).toLocaleDateString()}</div>
+                        <div>🕒 {new Date(selectedVersion.createdAt).toLocaleTimeString()}</div>
+                      </div>
                     </div>
-                    <div style={{ fontSize: "0.9rem", lineHeight: "1.5" }}>{version.content}</div>
+                    <div style={{ 
+                      fontSize: "0.95rem", 
+                      lineHeight: "1.6", 
+                      color: "#212529",
+                      whiteSpace: "pre-wrap"
+                    }}>
+                      {selectedVersion.content}
+                    </div>
+                    
+                    <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #dee2e6' }}>
+                      <button
+                        onClick={() => handleMakeAvailable(selectedPortfolio.id, selectedVersion.version)}
+                        style={{
+                          background: '#28a745',
+                          color: 'white',
+                          border: 'none',
+                          padding: '0.5rem 1rem',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '0.9rem'
+                        }}
+                      >
+                        🌐 Make Available for All Reviewers
+                      </button>
+                    </div>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>

@@ -116,3 +116,5 @@ function SearchReviewers() {
     </div>
   )
 }
+
+export default SearchReviewers

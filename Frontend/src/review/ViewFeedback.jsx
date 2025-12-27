@@ -38,9 +38,9 @@ function ViewFeedback() {
       portfolioTitle: portfolio.title,
       portfolioContent: portfolio.content,
       reviewerName: review.reviewerName,
+      reviewerEmail: review.reviewerEmail,
       reviewScore: review.score,
-      reviewFeedback: review.feedback,
-      createdAt: new Date().toISOString()
+      reviewFeedback: review.feedback
     }
     addPost(postData)
     alert("Portfolio and review posted successfully!")

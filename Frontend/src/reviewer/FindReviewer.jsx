@@ -7,49 +7,65 @@ import { useNotificationContext } from "../context/NotificationContext"
 import "../styles/FindReviewer.css"
 
 function FindReviewer() {
-  const { reviewers } = useContext(ReviewerContext)
-  const { portfolios, sendReviewRequest, reviewRequests } = useContext(PortfolioContext)
-  const { user } = useContext(AuthContext)
+  const { reviewers } = useContext(ReviewerContext) || { reviewers: [] }
+  const { portfolios, sendReviewRequest, reviewRequests } = useContext(PortfolioContext) || { portfolios: [], reviewRequests: [] }
+  const { user } = useContext(AuthContext) || {}
   const [expandedReviewer, setExpandedReviewer] = useState(null)
   const [showRequestModal, setShowRequestModal] = useState(false)
   const [selectedReviewer, setSelectedReviewer] = useState(null)
   const [selectedPortfolio, setSelectedPortfolio] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
-  const { success, warning } = useNotificationContext()
+  const { success, warning } = useNotificationContext() || { success: () => {}, warning: () => {} }
 
-  const userPortfolios = portfolios.filter(p => p.owner === user?.email)
+  if (!reviewers || !Array.isArray(reviewers)) {
+    return (
+      <div className="dashboard-with-navbar">
+        <OwnerNavbar />
+        <div style={{ padding: "2rem", textAlign: "center" }}>
+          <h2>Loading reviewers...</h2>
+        </div>
+      </div>
+    )
+  }
+
+  const userPortfolios = (portfolios || []).filter(p => p.owner === user?.email)
 
   const getReviewCount = (reviewerEmail) => {
-    return reviewRequests.filter(req => 
+    return (reviewRequests || []).filter(req => 
       req.reviewerEmail === reviewerEmail && req.status === "completed"
     ).length
   }
 
-  const filteredReviewers = reviewers.filter(reviewer => {
+  const filteredReviewers = (reviewers || []).filter(reviewer => {
     if (!searchQuery.trim()) return true
     
     const query = searchQuery.toLowerCase()
     return (
-      reviewer.name.toLowerCase().includes(query) ||
-      reviewer.skills.toLowerCase().includes(query) ||
-      reviewer.workplace.toLowerCase().includes(query) ||
-      reviewer.qualifications.toLowerCase().includes(query)
+      (reviewer.name || '').toLowerCase().includes(query) ||
+      (reviewer.skills || '').toLowerCase().includes(query) ||
+      (reviewer.workplace || '').toLowerCase().includes(query) ||
+      (reviewer.qualifications || '').toLowerCase().includes(query)
     )
   })
 
   const handleRequestReview = () => {
     if (!selectedPortfolio) {
-      warning("Please select a portfolio")
+      warning && warning("Please select a portfolio")
       return
     }
     
     const portfolio = userPortfolios.find(p => p.title === selectedPortfolio)
+    if (!portfolio || !sendReviewRequest) {
+      warning && warning("Portfolio not found")
+      return
+    }
+    
     const success_result = sendReviewRequest(portfolio.id, selectedReviewer.email)
     
     if (success_result) {
-      success(`Review request sent to ${selectedReviewer.name} for "${portfolio.title}"!`)
+      success && success(`Review request sent to ${selectedReviewer.name} for "${portfolio.title}"!`)
     } else {
-      warning("Failed to send review request")
+      warning && warning("Failed to send review request")
     }
     
     setShowRequestModal(false)
@@ -139,7 +155,7 @@ function FindReviewer() {
                   </div>
                   <div className="reviewer-basic-info">
                     <h3>{reviewer.name}</h3>
-                    <p className="reviewer-specialty">{reviewer.skills.split(',')[0] || "Professional Reviewer"}</p>
+                    <p className="reviewer-specialty">{(reviewer.skills || 'Professional Reviewer').split(',')[0]}</p>
                     <p style={{ fontSize: "0.8rem", color: "#666", margin: "0.25rem 0" }}>{reviewer.workplace}</p>
                     <div className="reviewer-stats">
                       <span className="review-count">{reviewCount} Reviews</span>
@@ -156,7 +172,7 @@ function FindReviewer() {
                     <div className="detail-section">
                       <h4>Skills & Expertise</h4>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.5rem" }}>
-                        {reviewer.skills.split(',').map((skill, index) => (
+                        {(reviewer.skills || '').split(',').map((skill, index) => (
                           <span key={index} style={{
                             background: "#e0f2fe",
                             color: "#0277bd",
@@ -173,8 +189,8 @@ function FindReviewer() {
                     
                     <div className="detail-section">
                       <h4>Professional Background</h4>
-                      <p><strong>Workplace:</strong> {reviewer.workplace}</p>
-                      <p><strong>Qualifications:</strong> {reviewer.qualifications}</p>
+                      <p><strong>Workplace:</strong> {reviewer.workplace || 'Not specified'}</p>
+                      <p><strong>Qualifications:</strong> {reviewer.qualifications || 'Not specified'}</p>
                     </div>
                     
                     <button 

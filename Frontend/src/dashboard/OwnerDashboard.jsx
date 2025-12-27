@@ -16,6 +16,9 @@ function OwnerDashboard() {
   const completedReviews = reviewRequests.filter(req => 
     req.ownerEmail === user?.email && req.status === "completed"
   )
+  const pendingRequests = reviewRequests.filter(req => 
+    req.ownerEmail === user?.email && req.status === "pending"
+  )
   const recentPosts = posts.slice(0, 3)
 
   const handlePostReview = (review) => {
@@ -105,7 +108,40 @@ function OwnerDashboard() {
             </section>
 
             <section className="reviews-section">
-              <h2 className="section-title">Completed Reviews</h2>
+              <h2 className="section-title">Review Requests ({pendingRequests.length})</h2>
+              {pendingRequests.length > 0 ? (
+                <div className="reviews-list">
+                  {pendingRequests.map(request => (
+                    <div key={request.id} className="review-item" style={{ border: '2px solid #ffc107' }}>
+                      <div className="reviewer-avatar">
+                        {request.reviewerName.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="review-content">
+                        <div className="review-header">
+                          <div className="reviewer-info">
+                            <span className="reviewer-name">{request.reviewerName} wants to review</span>
+                            <span className="reviewer-title">Portfolio: {request.portfolioTitle}</span>
+                          </div>
+                          <span className="review-date">
+                            {new Date(request.requestDate).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div className="review-body">
+                          <p style={{ margin: '0.5rem 0', color: '#666' }}>Pending your approval</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: "center", padding: "1rem", background: '#f8f9fa', borderRadius: '8px' }}>
+                  <p>No pending review requests.</p>
+                </div>
+              )}
+            </section>
+
+            <section className="reviews-section">
+              <h2 className="section-title">Completed Reviews ({completedReviews.length})</h2>
               {completedReviews.length > 0 ? (
                 <div className="reviews-list">
                   {completedReviews.map(review => (

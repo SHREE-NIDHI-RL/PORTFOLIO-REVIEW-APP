@@ -4,6 +4,7 @@ import './index.css'
 import App from './App.jsx'
 import AuthProvider from './context/AuthContext.jsx'
 import PortfolioProvider from './context/PortfolioContext.jsx'
+import ReviewerProvider from './context/ReviewerContext.jsx'
 import { NotificationProvider } from './context/NotificationContext.jsx'
 
 function ErrorBoundary({ children }) {
@@ -11,20 +12,32 @@ function ErrorBoundary({ children }) {
     return children
   } catch (error) {
     console.error('Error in app:', error)
-    return <div>Something went wrong. Check console for details.</div>
+    return <div style={{ padding: '20px', color: 'red' }}>Something went wrong. Check console for details.</div>
   }
 }
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <ErrorBoundary>
-      <AuthProvider>
-        <PortfolioProvider>
-          <NotificationProvider>
-            <App />
-          </NotificationProvider>
-        </PortfolioProvider>
-      </AuthProvider>
-    </ErrorBoundary>
-  </StrictMode>
-)
+try {
+  const rootElement = document.getElementById('root')
+  if (!rootElement) {
+    throw new Error('Root element not found')
+  }
+  
+  createRoot(rootElement).render(
+    <StrictMode>
+      <ErrorBoundary>
+        <AuthProvider>
+          <ReviewerProvider>
+            <PortfolioProvider>
+              <NotificationProvider>
+                <App />
+              </NotificationProvider>
+            </PortfolioProvider>
+          </ReviewerProvider>
+        </AuthProvider>
+      </ErrorBoundary>
+    </StrictMode>
+  )
+} catch (error) {
+  console.error('Failed to render app:', error)
+  document.body.innerHTML = '<div style="padding: 20px; color: red;">Failed to load app. Check console for details.</div>'
+}

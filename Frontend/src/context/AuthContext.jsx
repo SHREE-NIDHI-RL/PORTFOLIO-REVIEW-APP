@@ -84,7 +84,13 @@ function AuthProvider({ children }) {
   }
 
   const addUser = (userData) => {
-    users.push(userData)
+    const newUser = { ...userData, id: Date.now() }
+    setUsers([...users, newUser])
+    
+    // If it's a reviewer, also add to reviewers list in PortfolioContext
+    if (userData.role === 'reviewer') {
+      // This will be handled by the registration component
+    }
   }
 
   return (

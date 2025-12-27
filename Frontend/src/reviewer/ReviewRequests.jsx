@@ -1,6 +1,7 @@
 import { useState, useContext } from "react"
 import { AuthContext } from "../context/AuthContext"
 import { PortfolioContext } from "../context/PortfolioContext"
+import { Link } from "react-router-dom"
 import ReviewerNavbar from "../components/ReviewerNavbar"
 import "../styles/ReviewWorkflow.css"
 
@@ -96,8 +97,8 @@ function ReviewRequests() {
                 </div>
                 
                 <div className="request-actions">
-                  <a 
-                    href={`/submit-review?requestId=${req.id}`}
+                  <Link 
+                    to={`/submit-review?requestId=${req.id}`}
                     className="accept-btn"
                     style={{ 
                       textDecoration: "none", 
@@ -107,7 +108,7 @@ function ReviewRequests() {
                     }}
                   >
                     Submit Review
-                  </a>
+                  </Link>
                 </div>
               </div>
             ))}

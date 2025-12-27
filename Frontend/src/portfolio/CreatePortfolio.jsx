@@ -63,9 +63,9 @@ function CreatePortfolio() {
     
     let content = values.description
     if (uploadType === 'file' && values.portfolioFile) {
-      content = `[PDF File: ${values.portfolioFile.name}] ${values.description}`
+      content = `PDF Portfolio: ${values.portfolioFile.name}\n\n${values.description}`
     } else if (uploadType === 'link' && values.externalLink) {
-      content = `[External Link: ${values.externalLink}] ${values.description}`
+      content = `External Portfolio: ${values.externalLink}\n\n${values.description}`
     }
     
     const portfolioData = {
@@ -84,7 +84,7 @@ function CreatePortfolio() {
     addPortfolio(portfolioData)
     alert("Portfolio created successfully!")
     reset()
-    navigate("/dashboard")
+    navigate("/saved-portfolios")
   }
 
   if (showForm) {

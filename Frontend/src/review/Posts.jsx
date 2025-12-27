@@ -12,7 +12,7 @@ function Posts() {
   const { user } = useContext(AuthContext)
 
   const userPosts = posts.filter(post => post.authorEmail === user?.email)
-  const allPosts = posts.sort((a, b) => new Date(b.postDate) - new Date(a.postDate))
+  const allPosts = posts.sort((a, b) => new Date(b.postDate || b.createdAt) - new Date(a.postDate || a.createdAt))
 
   return (
     <div className="dashboard-with-navbar">
@@ -48,7 +48,7 @@ function Posts() {
                     <div className="author-info">
                       <h4>{post.authorName}</h4>
                       <span className="post-date">
-                        {new Date(post.postDate).toLocaleDateString()}
+                        {new Date(post.postDate || post.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   </div>

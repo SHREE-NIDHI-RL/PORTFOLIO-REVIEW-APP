@@ -24,8 +24,17 @@ function SubmitReview() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
-    if (!request || request.reviewerEmail !== user?.email) {
+    if (!user) {
+      navigate('/login')
+      return
+    }
+    if (!request) {
       navigate('/review-requests')
+      return
+    }
+    if (request.reviewerEmail !== user.email) {
+      navigate('/review-requests')
+      return
     }
   }, [request, user, navigate])
 
@@ -89,135 +98,156 @@ function SubmitReview() {
   return (
     <div className="dashboard-with-navbar">
       <ReviewerNavbar />
-      <div className="auth-container">
-        <div className="auth-card" style={{ maxWidth: "900px" }}>
-          <h2 className="auth-title">Submit Structured Review</h2>
-          
-          <div style={{ 
-            backgroundColor: "#f8f9fa", 
-            padding: "1.5rem", 
-            borderRadius: "8px", 
-            marginBottom: "2rem" 
-          }}>
-            <h3>Portfolio Details</h3>
-            <p><strong>Title:</strong> {request.portfolioTitle}</p>
-            <p><strong>Owner:</strong> {request.ownerName} ({request.ownerEmail})</p>
-            <p><strong>Domain:</strong> {request.portfolioTitle.includes('UX') ? 'UI/UX Design' : 
+      <div className="reviewer-dashboard">
+        <div className="dashboard-header">
+          <h1 className="dashboard-title">Submit Portfolio Review</h1>
+          <p className="dashboard-subtitle">Provide detailed feedback to help improve this portfolio</p>
+        </div>
+
+        <div className="dashboard-content">
+          <div className="review-form-container">
+            {/* Portfolio Details Card */}
+            <div className="portfolio-details-card">
+              <h3 className="card-title">Portfolio Information</h3>
+              <div className="portfolio-info-grid">
+                <div className="info-item">
+                  <span className="info-label">Title:</span>
+                  <span className="info-value">{request.portfolioTitle}</span>
+                </div>
+                <div className="info-item">
+                  <span className="info-label">Owner:</span>
+                  <span className="info-value">{request.ownerName}</span>
+                </div>
+                <div className="info-item">
+                  <span className="info-label">Email:</span>
+                  <span className="info-value">{request.ownerEmail}</span>
+                </div>
+                <div className="info-item">
+                  <span className="info-label">Domain:</span>
+                  <span className="info-value">{request.portfolioTitle.includes('UX') ? 'UI/UX Design' : 
                                          request.portfolioTitle.includes('Web') ? 'Web Development' :
-                                         request.portfolioTitle.includes('Mobile') ? 'Mobile Development' : 'Design'}</p>
-            <div style={{ marginTop: "1rem" }}>
-              <h4>Portfolio Content:</h4>
-              <div style={{ 
-                backgroundColor: "white", 
-                padding: "1rem", 
-                borderRadius: "4px", 
-                border: "1px solid #ddd",
-                maxHeight: "200px",
-                overflowY: "auto"
-              }}>
-                {request.portfolioContent}
+                                         request.portfolioTitle.includes('Mobile') ? 'Mobile Development' : 'Design'}</span>
+                </div>
+              </div>
+              
+              <div className="portfolio-content-section">
+                <h4 className="content-title">Portfolio Content</h4>
+                <div className="content-preview">
+                  {request.portfolioContent}
+                </div>
               </div>
             </div>
+
+            {/* Review Form Card */}
+            <div className="review-form-card">
+              <h3 className="card-title">Your Review</h3>
+              
+              <form onSubmit={handleSubmit} className="review-form">
+                {/* Score Section */}
+                <div className="form-section score-section">
+                  <label className="form-label score-label">
+                    <span className="label-icon">⭐</span>
+                    Overall Score (0-10)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10"
+                    step="0.1"
+                    value={score}
+                    onChange={(e) => setScore(e.target.value)}
+                    className="score-input"
+                    placeholder="e.g., 8.5"
+                    required
+                  />
+                  <small className="form-hint">
+                    Rate the overall quality (0 = Poor, 10 = Excellent)
+                  </small>
+                </div>
+
+                {/* Strengths Section */}
+                <div className="form-section strengths-section">
+                  <label className="form-label strengths-label">
+                    <span className="label-icon">✅</span>
+                    Strengths
+                  </label>
+                  <textarea
+                    placeholder="What are the strong points of this portfolio? What did the owner do well? Be specific about design elements, technical skills, presentation, etc."
+                    value={strengths}
+                    onChange={(e) => setStrengths(e.target.value)}
+                    className="form-textarea"
+                    rows="4"
+                    required
+                  />
+                </div>
+
+                {/* Weaknesses Section */}
+                <div className="form-section weaknesses-section">
+                  <label className="form-label weaknesses-label">
+                    <span className="label-icon">⚠️</span>
+                    Areas for Improvement
+                  </label>
+                  <textarea
+                    placeholder="What aspects could be improved? What are the main weaknesses or missing elements? Be constructive and specific."
+                    value={weaknesses}
+                    onChange={(e) => setWeaknesses(e.target.value)}
+                    className="form-textarea"
+                    rows="4"
+                    required
+                  />
+                </div>
+
+                {/* Suggestions Section */}
+                <div className="form-section suggestions-section">
+                  <label className="form-label suggestions-label">
+                    <span className="label-icon">💡</span>
+                    Suggestions for Improvement
+                  </label>
+                  <textarea
+                    placeholder="Provide specific, actionable suggestions on how the owner can improve their portfolio. Include resources, techniques, or changes they should consider."
+                    value={suggestions}
+                    onChange={(e) => setSuggestions(e.target.value)}
+                    className="form-textarea"
+                    rows="4"
+                    required
+                  />
+                </div>
+
+                {/* Additional Comments Section */}
+                <div className="form-section comments-section">
+                  <label className="form-label comments-label">
+                    <span className="label-icon">💬</span>
+                    Additional Comments (Optional)
+                  </label>
+                  <textarea
+                    placeholder="Any additional feedback, encouragement, or industry insights you'd like to share..."
+                    value={generalFeedback}
+                    onChange={(e) => setGeneralFeedback(e.target.value)}
+                    className="form-textarea"
+                    rows="3"
+                  />
+                </div>
+
+                {/* Warning Note */}
+                <div className="warning-note">
+                  <span className="warning-icon">⚠️</span>
+                  <p>
+                    <strong>Note:</strong> Once submitted, this review will be locked and cannot be edited. 
+                    The review will be linked to this specific portfolio version.
+                  </p>
+                </div>
+
+                {/* Submit Button */}
+                <button 
+                  type="submit" 
+                  className="submit-review-btn"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Submitting Review..." : "Submit Structured Review"}
+                </button>
+              </form>
+            </div>
           </div>
-
-          <form onSubmit={handleSubmit} className="auth-form">
-            <div style={{ marginBottom: "1.5rem" }}>
-              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold", color: "#2563eb" }}>
-                Overall Score (0-10)
-              </label>
-              <input
-                type="number"
-                min="0"
-                max="10"
-                step="0.1"
-                value={score}
-                onChange={(e) => setScore(e.target.value)}
-                className="auth-input"
-                placeholder="e.g., 8.5"
-                required
-              />
-              <small style={{ color: "#6b7280", fontSize: "0.8rem" }}>
-                Rate the overall quality of this portfolio (0 = Poor, 10 = Excellent)
-              </small>
-            </div>
-
-            <div style={{ marginBottom: "1.5rem" }}>
-              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold", color: "#059669" }}>
-                Strengths
-              </label>
-              <textarea
-                placeholder="What are the strong points of this portfolio? What did the owner do well? Be specific about design elements, technical skills, presentation, etc."
-                value={strengths}
-                onChange={(e) => setStrengths(e.target.value)}
-                className="auth-input"
-                rows="4"
-                required
-              />
-            </div>
-
-            <div style={{ marginBottom: "1.5rem" }}>
-              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold", color: "#dc2626" }}>
-                Weaknesses / Areas for Improvement
-              </label>
-              <textarea
-                placeholder="What aspects of the portfolio could be improved? What are the main weaknesses or missing elements? Be constructive and specific."
-                value={weaknesses}
-                onChange={(e) => setWeaknesses(e.target.value)}
-                className="auth-input"
-                rows="4"
-                required
-              />
-            </div>
-
-            <div style={{ marginBottom: "1.5rem" }}>
-              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold", color: "#7c3aed" }}>
-                Suggestions for Improvement
-              </label>
-              <textarea
-                placeholder="Provide specific, actionable suggestions on how the owner can improve their portfolio. Include resources, techniques, or changes they should consider."
-                value={suggestions}
-                onChange={(e) => setSuggestions(e.target.value)}
-                className="auth-input"
-                rows="4"
-                required
-              />
-            </div>
-
-            <div style={{ marginBottom: "2rem" }}>
-              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold", color: "#6b7280" }}>
-                Additional Comments (Optional)
-              </label>
-              <textarea
-                placeholder="Any additional feedback, encouragement, or industry insights you'd like to share..."
-                value={generalFeedback}
-                onChange={(e) => setGeneralFeedback(e.target.value)}
-                className="auth-input"
-                rows="3"
-              />
-            </div>
-
-            <div style={{ 
-              backgroundColor: "#fef3c7", 
-              padding: "1rem", 
-              borderRadius: "6px", 
-              marginBottom: "1.5rem",
-              border: "1px solid #f59e0b"
-            }}>
-              <p style={{ margin: 0, fontSize: "0.9rem", color: "#92400e" }}>
-                <strong>Note:</strong> Once submitted, this review will be locked and cannot be edited. 
-                The review will be linked to this specific portfolio version.
-              </p>
-            </div>
-
-            <button 
-              type="submit" 
-              className="auth-button"
-              disabled={isSubmitting}
-              style={{ width: "100%", padding: "0.75rem" }}
-            >
-              {isSubmitting ? "Submitting Review..." : "Submit Structured Review"}
-            </button>
-          </form>
         </div>
       </div>
     </div>

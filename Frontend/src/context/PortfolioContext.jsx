@@ -150,6 +150,7 @@ function PortfolioProvider({ children }) {
       email: "sarah.johnson@techcorp.com",
       workplace: "TechCorp Solutions",
       qualifications: "PhD in Computer Science, 10+ years UX/UI experience",
+      skills: "Frontend Development, UI/UX Design, React, JavaScript",
       credibilityScore: 4.8,
       reviews: []
     },
@@ -158,6 +159,7 @@ function PortfolioProvider({ children }) {
       email: "michael.chen@innovate.com",
       workplace: "Innovate Design Studio",
       qualifications: "Senior Mobile Developer, React Native Expert",
+      skills: "Full-Stack Development, Python, Node.js, AWS",
       credibilityScore: 4.6,
       reviews: []
     },
@@ -166,6 +168,7 @@ function PortfolioProvider({ children }) {
       email: "emily.rodriguez@designstudio.com",
       workplace: "Creative Design Studio",
       qualifications: "Senior UX Designer, Design Systems Specialist",
+      skills: "Product Design, User Research, Figma, Adobe Creative Suite",
       credibilityScore: 4.7,
       reviews: []
     },
@@ -174,6 +177,7 @@ function PortfolioProvider({ children }) {
       email: "david.kumar@datatech.com",
       workplace: "DataTech Analytics",
       qualifications: "AI/ML Engineer, Data Science Expert",
+      skills: "AI/ML, Data Science, Python, TensorFlow",
       credibilityScore: 4.9,
       reviews: []
     }
@@ -342,6 +346,11 @@ function PortfolioProvider({ children }) {
     return false
   }
 
+  const updateCredibilityScore = (reviewerEmail) => {
+    // Simple credibility update logic
+    return Math.min(5.0, Math.random() * 0.5 + 4.5)
+  }
+
   const submitReview = (requestId, reviewData) => {
     setReviewRequests(reviewRequests.map(req => 
       req.id === requestId 
@@ -380,6 +389,18 @@ function PortfolioProvider({ children }) {
     ))
   }
 
+  const updatePortfolioVisibility = (portfolioId, versionNum, isPublic) => {
+    setPortfolios(portfolios.map(p => {
+      if (p.id === portfolioId) {
+        const updatedVersions = p.versions?.map(v => 
+          v.version === versionNum ? { ...v, publicForReviewers: isPublic } : v
+        ) || [{ version: 1, content: p.content, createdAt: p.createdAt, publicForReviewers: isPublic }]
+        return { ...p, versions: updatedVersions }
+      }
+      return p
+    }))
+  }
+
   const getReviewerByEmail = (email) => {
     return reviewers.find(reviewer => reviewer.email === email)
   }
@@ -398,7 +419,8 @@ function PortfolioProvider({ children }) {
       submitReview,
       addPost,
       getReviewerByEmail,
-      updateCredibilityScore
+      updateCredibilityScore,
+      updatePortfolioVisibility
     }}>
       {children}
     </PortfolioContext.Provider>

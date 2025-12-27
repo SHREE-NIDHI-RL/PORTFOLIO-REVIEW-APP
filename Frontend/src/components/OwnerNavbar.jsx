@@ -20,8 +20,7 @@ function OwnerNavbar() {
     { path: "/saved-portfolios", icon: "💾", label: "Saved Portfolios" },
     { path: "/posts", icon: "📱", label: "Posts" },
     { path: "/find-reviewer", icon: "🔍", label: "Find a Reviewer" },
-    { path: "/view-feedback", icon: "💬", label: "View Feedback" },
-    { path: "/settings", icon: "⚙️", label: "Settings" }
+    { path: "/view-feedback", icon: "💬", label: "View Feedback" }
   ]
 
   return (
