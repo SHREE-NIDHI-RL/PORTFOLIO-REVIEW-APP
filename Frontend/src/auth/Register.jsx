@@ -15,8 +15,7 @@ function Register() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const navigate = useNavigate()
-  const { addUser } = useContext(AuthContext)
-  const { addReviewer } = useContext(ReviewerContext)
+  const { register } = useContext(AuthContext)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -36,26 +35,20 @@ function Register() {
         throw new Error("Please fill in all reviewer fields")
       }
       
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
       const userData = {
         name,
         email,
         password,
         role: role === "Portfolio Owner" ? "owner" : "reviewer",
-        qualifications: role === "Reviewer" ? qualifications : null,
-        workplace: role === "Reviewer" ? workplace : null,
-        skills: role === "Reviewer" ? qualifications : null,
+        qualifications: role === "Reviewer" ? qualifications : undefined,
+        workplace: role === "Reviewer" ? workplace : undefined,
+        skills: role === "Reviewer" ? qualifications : undefined,
       }
       
-      addUser(userData)
+      await register(userData)
       
-      if (role === "Reviewer") {
-        addReviewer(userData)
-      }
-      
-      setSuccess("Account created successfully! Redirecting to login...")
-      setTimeout(() => navigate("/login"), 2000)
+      setSuccess("Account created successfully! Redirecting to dashboard...")
+      setTimeout(() => navigate("/dashboard"), 2000)
     } catch (err) {
       setError(err.message)
     } finally {

@@ -1,100 +1,73 @@
-import { createContext, useState } from "react"
+import { createContext, useState, useEffect } from "react"
+import apiService from "../services/api"
 
 export const AuthContext = createContext()
 
-// Default users for testing (2 owners + 4 reviewers)
-const defaultUsers = [
-  {
-    name: "John Smith",
-    email: "owner@example.com",
-    password: "password123",
-    role: "owner"
-  },
-  {
-    name: "Jane Doe",
-    email: "jane.doe@example.com",
-    password: "password123",
-    role: "owner"
-  },
-  {
-    name: "Alex Smith",
-    email: "alex.smith@example.com",
-    password: "password123",
-    role: "owner"
-  },
-  {
-    name: "Dr. Sarah Johnson",
-    email: "sarah.johnson@techcorp.com",
-    password: "password123",
-    role: "reviewer",
-    skills: "Frontend Development, UI/UX Design, React, JavaScript",
-    workplace: "TechCorp Solutions",
-    qualifications: "PhD Computer Science, 8+ years experience"
-  },
-  {
-    name: "Michael Chen",
-    email: "michael.chen@innovate.com",
-    password: "password123",
-    role: "reviewer",
-    skills: "Full-Stack Development, Python, Node.js, AWS",
-    workplace: "Innovate Labs",
-    qualifications: "Senior Software Engineer, MS Computer Science"
-  },
-  {
-    name: "Emily Rodriguez",
-    email: "emily.rodriguez@designstudio.com",
-    password: "password123",
-    role: "reviewer",
-    skills: "Product Design, User Research, Figma, Adobe Creative Suite",
-    workplace: "Creative Design Studio",
-    qualifications: "Lead Product Designer, 6+ years experience"
-  },
-  {
-    name: "David Kumar",
-    email: "david.kumar@datatech.com",
-    password: "password123",
-    role: "reviewer",
-    skills: "AI/ML, Data Science, Python, TensorFlow",
-    workplace: "DataTech Analytics",
-    qualifications: "AI/ML Engineer, Data Science Expert"
-  }
-]
-
 function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  const [users] = useState(defaultUsers)
+  const [loading, setLoading] = useState(true)
 
-  const login = (email, password, role) => {
-    const foundUser = users.find(u => 
-      u.email === email && 
-      u.password === password && 
-      u.role === role
-    )
-    
-    if (foundUser) {
-      const { password: _, ...userWithoutPassword } = foundUser
-      setUser(userWithoutPassword)
-      return true
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      apiService.setToken(token)
+      getCurrentUser()
+    } else {
+      setLoading(false)
     }
-    return false
+  }, [])
+
+  const getCurrentUser = async () => {
+    try {
+      const response = await apiService.getCurrentUser()
+      setUser(response.user)
+    } catch (error) {
+      console.error('Error getting current user:', error)
+      localStorage.removeItem('token')
+      apiService.setToken(null)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const login = async (email, password, role) => {
+    try {
+      const response = await apiService.login({ email, password, role })
+      apiService.setToken(response.token)
+      setUser(response.user)
+      return true
+    } catch (error) {
+      console.error('Login error:', error)
+      return false
+    }
+  }
+
+  const register = async (userData) => {
+    try {
+      const response = await apiService.register(userData)
+      apiService.setToken(response.token)
+      setUser(response.user)
+      return true
+    } catch (error) {
+      console.error('Registration error:', error)
+      throw error
+    }
   }
 
   const logout = () => {
+    localStorage.removeItem('token')
+    apiService.setToken(null)
     setUser(null)
   }
 
-  const addUser = (userData) => {
-    const newUser = { ...userData, id: Date.now() }
-    setUsers([...users, newUser])
-    
-    // If it's a reviewer, also add to reviewers list in PortfolioContext
-    if (userData.role === 'reviewer') {
-      // This will be handled by the registration component
-    }
-  }
-
   return (
-    <AuthContext.Provider value={{ user, login, logout, addUser, defaultUsers }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      register, 
+      logout, 
+      loading 
+    }}>
       {children}
     </AuthContext.Provider>
   )
