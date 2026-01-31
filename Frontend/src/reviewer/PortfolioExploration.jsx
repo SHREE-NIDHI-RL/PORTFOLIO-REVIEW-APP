@@ -1,144 +1,97 @@
-import { useState, useContext } from "react"
+import { useContext, useState, useEffect } from "react"
 import { AuthContext } from "../context/AuthContext"
 import { PortfolioContext } from "../context/PortfolioContext"
 import ReviewerNavbar from "../components/ReviewerNavbar"
+import UserProfile from "../components/UserProfile"
+import apiService from "../services/api"
 import "../styles/ReviewerDashboard.css"
 
 function PortfolioExploration() {
   const { user } = useContext(AuthContext)
-  const { portfolios, addReviewRequest } = useContext(PortfolioContext)
+  const [publicPortfolios, setPublicPortfolios] = useState([])
   const [selectedPortfolio, setSelectedPortfolio] = useState(null)
-  const [filters, setFilters] = useState({
-    domain: '',
-    experienceLevel: ''
-  })
+  const [loading, setLoading] = useState(true)
+  const [requestMessage, setRequestMessage] = useState("")
 
-  // Filter portfolios that are made available for all reviewers
-  const publicPortfolios = portfolios.filter(p => {
-    // Check if any version is marked as public for reviewers
-    const hasPublicVersion = p.versions?.some(v => v.publicForReviewers) || false
-    return hasPublicVersion
-  })
-
-  const filteredPortfolios = publicPortfolios.filter(portfolio => {
-    const domainMatch = !filters.domain || 
-      (portfolio.domain && portfolio.domain.toLowerCase().includes(filters.domain.toLowerCase())) ||
-      (portfolio.title && portfolio.title.toLowerCase().includes(filters.domain.toLowerCase()))
-    
-    const levelMatch = !filters.experienceLevel || 
-      (portfolio.experienceLevel && portfolio.experienceLevel.toLowerCase() === filters.experienceLevel.toLowerCase())
-    
-    return domainMatch && levelMatch
-  })
+  useEffect(() => {
+    const fetchPublicPortfolios = async () => {
+      try {
+        const portfolios = await apiService.getPublicPortfolios()
+        setPublicPortfolios(portfolios)
+        setLoading(false)
+      } catch (error) {
+        console.error('Error loading public portfolios:', error)
+        setLoading(false)
+      }
+    }
+    fetchPublicPortfolios()
+  }, [])
 
   const handleViewPortfolio = (portfolio) => {
     setSelectedPortfolio(portfolio)
   }
 
-  const handleRequestReview = (portfolio) => {
-    const reviewRequest = {
-      portfolioId: portfolio.id,
-      portfolioTitle: portfolio.title,
-      portfolioContent: portfolio.content,
-      ownerName: portfolio.ownerName,
-      ownerEmail: portfolio.owner,
-      reviewerName: user.name,
-      reviewerEmail: user.email,
-      requestDate: new Date().toISOString(),
-      status: "pending"
+  const handleRequestReview = async (portfolio) => {
+    try {
+      await apiService.sendReviewerRequest({
+        portfolioId: portfolio._id,
+        message: requestMessage
+      })
+      alert("Review request sent successfully!")
+      setRequestMessage("")
+    } catch (error) {
+      alert(error.message || "Error sending request")
     }
-    
-    addReviewRequest(reviewRequest)
-    alert("Review request sent successfully!")
   }
 
-  const domains = ['UI/UX Design', 'Web Development', 'Mobile Development', 'Graphic Design', 'Product Design']
-  const experienceLevels = ['Beginner', 'Intermediate', 'Advanced', 'Expert']
+  if (loading) {
+    return (
+      <div className="dashboard-with-navbar">
+        <ReviewerNavbar />
+        <UserProfile />
+        <div className="reviewer-dashboard">
+          <div className="dashboard-header">
+            <h1 className="dashboard-title">Loading Portfolios...</h1>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="dashboard-with-navbar">
       <ReviewerNavbar />
+      <UserProfile />
       <div className="reviewer-dashboard">
         <div className="dashboard-header">
-          <h1 className="dashboard-title">Portfolio Exploration</h1>
+          <h1 className="dashboard-title">Explore Public Portfolios</h1>
+          <p>Discover portfolios available for review</p>
         </div>
 
         <div className="dashboard-content">
-          {/* Filters Section */}
-          <section className="filters-section">
-            <h2 className="section-title">Filter Portfolios</h2>
-            <div className="filters-grid">
-              <div className="filter-group">
-                <label htmlFor="domain-filter">Domain/Stream:</label>
-                <select 
-                  id="domain-filter"
-                  value={filters.domain}
-                  onChange={(e) => setFilters({...filters, domain: e.target.value})}
-                  className="filter-select"
-                >
-                  <option value="">All Domains</option>
-                  {domains.map(domain => (
-                    <option key={domain} value={domain}>{domain}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="filter-group">
-                <label htmlFor="level-filter">Experience Level:</label>
-                <select 
-                  id="level-filter"
-                  value={filters.experienceLevel}
-                  onChange={(e) => setFilters({...filters, experienceLevel: e.target.value})}
-                  className="filter-select"
-                >
-                  <option value="">All Levels</option>
-                  {experienceLevels.map(level => (
-                    <option key={level} value={level}>{level}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="filter-actions">
-                <button 
-                  onClick={() => setFilters({domain: '', experienceLevel: ''})}
-                  className="action-btn secondary"
-                >
-                  Clear Filters
-                </button>
-              </div>
-            </div>
-          </section>
-
-          {/* Portfolio Grid */}
           <section className="exploration-section">
-            <h2 className="section-title">
-              Open Portfolios ({filteredPortfolios.length} found)
-            </h2>
-            {filteredPortfolios.length > 0 ? (
+            <h2 className="section-title">Available Portfolios ({publicPortfolios.length})</h2>
+            {publicPortfolios.length > 0 ? (
               <div className="exploration-grid">
-                {filteredPortfolios.map((portfolio) => (
-                  <div key={portfolio.id} className="exploration-item">
+                {publicPortfolios.map((portfolio) => (
+                  <div key={portfolio._id} className="exploration-item">
                     <div className="exploration-content">
                       <div className="exploration-info">
                         <h3 className="exploration-title">{portfolio.title}</h3>
                         <p className="exploration-meta">
-                          Owner: {portfolio.ownerName || "Portfolio Owner"} • Open for Review
+                          Owner: {portfolio.owner?.name || portfolio.ownerName} • {portfolio.domain || 'General'}
                         </p>
                         <div className="exploration-tags">
                           <span className="domain-tag">
-                            {portfolio.domain || 
-                             (portfolio.title.includes('UX') ? 'UI/UX Design' : 
-                              portfolio.title.includes('Web') ? 'Web Development' :
-                              portfolio.title.includes('Mobile') ? 'Mobile Development' : 'Design')}
+                            {portfolio.domain || 'General'}
                           </span>
                           <span className="level-tag">
                             {portfolio.experienceLevel || 'Intermediate'}
                           </span>
-                          <span className="status-tag status-open">
-                            Open for Review
-                          </span>
                         </div>
-                        <div className="portfolio-preview">
-                          {(portfolio.content || portfolio.description || "Portfolio available for review").substring(0, 150)}...
-                        </div>
+                        <p className="portfolio-preview">
+                          {portfolio.content.substring(0, 150)}...
+                        </p>
                         <div className="exploration-actions">
                           <button 
                             onClick={() => handleViewPortfolio(portfolio)}
@@ -160,8 +113,8 @@ function PortfolioExploration() {
               </div>
             ) : (
               <div style={{ textAlign: "center", padding: "3rem", color: "#666" }}>
-                <h3>No portfolios found</h3>
-                <p>Try adjusting your filters or check back later for new portfolios.</p>
+                <h3>No public portfolios available</h3>
+                <p>Check back later for new portfolios to review.</p>
               </div>
             )}
           </section>
@@ -182,20 +135,34 @@ function PortfolioExploration() {
                 
                 <div className="modal-body">
                   <div className="portfolio-details">
-                    <p><strong>Owner:</strong> {selectedPortfolio.ownerName || "Portfolio Owner"}</p>
-                    <p><strong>Domain:</strong> {selectedPortfolio.domain || 
-                      (selectedPortfolio.title.includes('UX') ? 'UI/UX Design' : 
-                       selectedPortfolio.title.includes('Web') ? 'Web Development' :
-                       selectedPortfolio.title.includes('Mobile') ? 'Mobile Development' : 'Design')}</p>
+                    <p><strong>Owner:</strong> {selectedPortfolio.owner?.name || selectedPortfolio.ownerName}</p>
+                    <p><strong>Domain:</strong> {selectedPortfolio.domain || 'General'}</p>
                     <p><strong>Experience Level:</strong> {selectedPortfolio.experienceLevel || 'Intermediate'}</p>
-                    <p><strong>Created:</strong> {new Date(selectedPortfolio.createdAt).toLocaleDateString()}</p>
+                    <p><strong>Upload Type:</strong> {selectedPortfolio.uploadType || 'text'}</p>
                   </div>
                   
                   <div className="portfolio-content-view">
-                    <h4>Portfolio Preview:</h4>
+                    <h4>Portfolio Content:</h4>
                     <div className="content-preview">
-                      {selectedPortfolio.content || selectedPortfolio.description || "Portfolio content available for detailed review upon acceptance."}
+                      {selectedPortfolio.content}
                     </div>
+                  </div>
+
+                  <div style={{ marginTop: "1.5rem" }}>
+                    <h4>Request Message (Optional):</h4>
+                    <textarea
+                      value={requestMessage}
+                      onChange={(e) => setRequestMessage(e.target.value)}
+                      placeholder="Add a message to your review request..."
+                      style={{
+                        width: "100%",
+                        minHeight: "80px",
+                        padding: "0.75rem",
+                        border: "1px solid #ddd",
+                        borderRadius: "6px",
+                        resize: "vertical"
+                      }}
+                    />
                   </div>
                 </div>
                 
@@ -203,9 +170,8 @@ function PortfolioExploration() {
                   <button 
                     onClick={() => handleRequestReview(selectedPortfolio)}
                     className="action-btn primary"
-                    style={{ marginRight: '1rem' }}
                   >
-                    Request to Review
+                    Send Review Request
                   </button>
                   <button 
                     onClick={() => setSelectedPortfolio(null)}

@@ -1,46 +1,120 @@
-import { useContext, useState } from "react"
+import { useContext, useState, useEffect } from "react"
 import { AuthContext } from "../context/AuthContext"
 import { PortfolioContext } from "../context/PortfolioContext"
 import { Link } from "react-router-dom"
 import ReviewerNavbar from "../components/ReviewerNavbar"
-import UserProfile from "../components/UserProfile"
+import { useNotificationContext } from "../context/NotificationContext"
 import "../styles/ReviewerDashboard.css"
 
 function ReviewerDashboard() {
   const { user } = useContext(AuthContext)
-  const { reviewRequests, updateRequestStatus, posts, portfolios, addReviewRequest } = useContext(PortfolioContext)
+  const { reviewRequests, updateRequestStatus, posts, portfolios, loadData } = useContext(PortfolioContext)
   const [selectedPortfolio, setSelectedPortfolio] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const { success, error: notificationError } = useNotificationContext()
   
-  const pendingRequests = reviewRequests.filter(req => 
+  useEffect(() => {
+    const fetchData = async () => {
+      if (user) {
+        try {
+          console.log('Loading reviewer dashboard data for user:', user)
+          await loadData()
+        } catch (err) {
+          console.error('Error loading dashboard data:', err)
+          setError('Failed to load dashboard data')
+        } finally {
+          setLoading(false)
+        }
+      } else {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [user, loadData])
+  
+  const pendingRequests = (reviewRequests || []).filter(req => 
     req.reviewerEmail === user?.email && req.status === "pending"
   )
-  const acceptedRequests = reviewRequests.filter(req => 
+  const acceptedRequests = (reviewRequests || []).filter(req => 
     req.reviewerEmail === user?.email && req.status === "accepted"
   )
-  const completedReviews = reviewRequests.filter(req => 
+  const completedReviews = (reviewRequests || []).filter(req => 
     req.reviewerEmail === user?.email && req.status === "completed"
   )
-  const openPortfolios = portfolios.filter(p => p.openForReview && !p.private)
-  const recentPosts = posts.slice(0, 3)
+  const openPortfolios = (portfolios || []).filter(p => p.openForReview && !p.private)
+  const recentPosts = (posts || []).slice(0, 3)
 
-  const handleAcceptRequest = (requestId) => {
-    updateRequestStatus(requestId, "accepted")
-    alert("Request accepted! You can now review the portfolio.")
+  const handleAcceptRequest = async (requestId) => {
+    try {
+      await updateRequestStatus(requestId, "accepted")
+      success("Request accepted! You can now review the portfolio.")
+    } catch (err) {
+      console.error('Error accepting request:', err)
+      notificationError("Failed to accept request. Please try again.")
+    }
   }
 
-  const handleRejectRequest = (requestId) => {
-    updateRequestStatus(requestId, "rejected")
-    alert("Request rejected.")
+  const handleRejectRequest = async (requestId) => {
+    try {
+      await updateRequestStatus(requestId, "rejected")
+      success("Request rejected.")
+    } catch (err) {
+      console.error('Error rejecting request:', err)
+      notificationError("Failed to reject request. Please try again.")
+    }
   }
 
   const handleViewPortfolio = (portfolio) => {
     setSelectedPortfolio(portfolio)
   }
 
+  if (loading) {
+    return (
+      <>
+        <ReviewerNavbar />
+        <div className="dashboard-with-navbar">
+          <div className="reviewer-dashboard">
+            <div className="dashboard-header">
+              <h1 className="dashboard-title">Loading Dashboard...</h1>
+            </div>
+            <div style={{ textAlign: 'center', padding: '2rem' }}>
+              <p>Please wait while we load your reviewer dashboard...</p>
+            </div>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  if (error) {
+    return (
+      <>
+        <ReviewerNavbar />
+        <div className="dashboard-with-navbar">
+          <div className="reviewer-dashboard">
+            <div className="dashboard-header">
+              <h1 className="dashboard-title">Error Loading Dashboard</h1>
+            </div>
+            <div style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>
+              <p>{error}</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="action-btn primary"
+                style={{ marginTop: '1rem' }}
+              >
+                Reload Page
+              </button>
+            </div>
+          </div>
+        </div>
+      </>
+    )
+  }
+
   return (
     <>
       <ReviewerNavbar />
-      <UserProfile />
       <div className="dashboard-with-navbar">
         <div className="reviewer-dashboard">
           <div className="dashboard-header">
@@ -54,7 +128,7 @@ function ReviewerDashboard() {
               {pendingRequests.length > 0 ? (
                 <div className="requests-grid">
                   {pendingRequests.map((request) => (
-                    <div key={request.id} className="request-item">
+                    <div key={request._id} className="request-item">
                       <div className="request-content">
                         <div className="request-info">
                           <h3 className="request-title">{request.portfolioTitle}</h3>
@@ -73,13 +147,13 @@ function ReviewerDashboard() {
                           </div>
                           <div className="request-actions">
                             <button 
-                              onClick={() => handleAcceptRequest(request.id)}
+                              onClick={() => handleAcceptRequest(request._id)}
                               className="action-btn primary"
                             >
                               Accept Request
                             </button>
                             <button 
-                              onClick={() => handleRejectRequest(request.id)}
+                              onClick={() => handleRejectRequest(request._id)}
                               className="action-btn secondary"
                             >
                               Reject Request
@@ -108,7 +182,7 @@ function ReviewerDashboard() {
               {acceptedRequests.length > 0 ? (
                 <div className="assigned-grid">
                   {acceptedRequests.map((request) => (
-                    <div key={request.id} className="assigned-item">
+                    <div key={request._id} className="assigned-item">
                       <div className="assigned-content">
                         <div className="assigned-info">
                           <h3 className="assigned-title">{request.portfolioTitle}</h3>
@@ -133,7 +207,7 @@ function ReviewerDashboard() {
                               View Portfolio
                             </button>
                             <Link 
-                              to={`/submit-review?requestId=${request.id}`}
+                              to={`/submit-review?requestId=${request._id}`}
                               className="action-btn secondary"
                               style={{ textDecoration: 'none', textAlign: 'center' }}
                             >
@@ -158,7 +232,7 @@ function ReviewerDashboard() {
               {completedReviews.length > 0 ? (
                 <div className="history-list">
                   {completedReviews.map(review => (
-                    <div key={review.id} className="history-item">
+                    <div key={review._id} className="history-item">
                       <div className="reviewer-avatar">
                         {review.portfolioTitle.charAt(0).toUpperCase()}
                       </div>
@@ -169,7 +243,7 @@ function ReviewerDashboard() {
                             <span className="history-meta">Score: {review.score}/10 • Version 1.0</span>
                           </div>
                           <span className="history-date">
-                            {new Date(review.reviewDate).toLocaleDateString()}
+                            {new Date(review.reviewDate || review.updatedAt).toLocaleDateString()}
                           </span>
                         </div>
                         <div className="history-body">
@@ -218,19 +292,8 @@ function ReviewerDashboard() {
                             </button>
                             <button 
                               onClick={() => {
-                                const reviewRequest = {
-                                  portfolioId: portfolio.id,
-                                  portfolioTitle: portfolio.title,
-                                  portfolioContent: portfolio.content,
-                                  ownerName: portfolio.ownerName,
-                                  ownerEmail: portfolio.owner,
-                                  reviewerName: user.name,
-                                  reviewerEmail: user.email,
-                                  requestDate: new Date().toISOString(),
-                                  status: "pending"
-                                }
-                                addReviewRequest(reviewRequest)
-                                alert("Review request sent!")
+                                // This functionality should be handled by the portfolio exploration page
+                                notificationError("Please use the Portfolio Exploration page to request reviews.")
                               }}
                               className="action-btn secondary"
                             >

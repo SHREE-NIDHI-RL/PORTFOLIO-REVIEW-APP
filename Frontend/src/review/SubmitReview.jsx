@@ -13,8 +13,8 @@ function SubmitReview() {
   const navigate = useNavigate()
   const { success, error } = useNotificationContext()
   
-  const requestId = parseInt(searchParams.get('requestId'))
-  const request = reviewRequests.find(req => req.id === requestId)
+  const requestId = searchParams.get('requestId')
+  const request = reviewRequests.find(req => req._id === requestId)
 
   const [score, setScore] = useState(0)
   const [strengths, setStrengths] = useState("")
@@ -29,56 +29,65 @@ function SubmitReview() {
       return
     }
     if (!request) {
-      navigate('/review-requests')
+      navigate('/dashboard')
       return
     }
     if (request.reviewerEmail !== user.email) {
-      navigate('/review-requests')
+      navigate('/dashboard')
       return
     }
   }, [request, user, navigate])
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     if (score < 1 || score > 10) {
-      alert("Please enter a score between 1 and 10")
+      error && error("Please enter a score between 1 and 10")
       return
     }
     
     if (!strengths.trim() || !weaknesses.trim() || !suggestions.trim()) {
-      alert("Please fill in all structured feedback sections (Strengths, Weaknesses, Suggestions)")
+      error && error("Please fill in all structured feedback sections (Strengths, Weaknesses, Suggestions)")
       return
     }
 
     setIsSubmitting(true)
 
-    // Combine structured feedback into a comprehensive review
-    const structuredFeedback = {
-      strengths: strengths.trim(),
-      weaknesses: weaknesses.trim(),
-      suggestions: suggestions.trim(),
-      generalFeedback: generalFeedback.trim()
+    try {
+      const structuredFeedback = {
+        strengths: strengths.trim(),
+        weaknesses: weaknesses.trim(),
+        suggestions: suggestions.trim(),
+        generalFeedback: generalFeedback.trim()
+      }
+
+      const combinedFeedback = `STRENGTHS:\n${strengths.trim()}\n\nWEAKNESSES:\n${weaknesses.trim()}\n\nSUGGESTIONS FOR IMPROVEMENT:\n${suggestions.trim()}${generalFeedback.trim() ? `\n\nADDITIONAL COMMENTS:\n${generalFeedback.trim()}` : ''}`
+
+      const reviewData = {
+        score: parseFloat(score),
+        feedback: combinedFeedback,
+        structuredFeedback: structuredFeedback
+      }
+
+      await submitReview(requestId, reviewData)
+      
+      if (success) {
+        success(`Review submitted successfully for "${request.portfolioTitle}"! The portfolio owner will be notified.`)
+      }
+      
+      // Navigate back to dashboard
+      setTimeout(() => {
+        navigate('/dashboard')
+      }, 1000)
+      
+    } catch (err) {
+      console.error('Submit review error:', err)
+      if (error) {
+        error('Failed to submit review. Please try again.')
+      }
+    } finally {
+      setIsSubmitting(false)
     }
-
-    const combinedFeedback = `STRENGTHS:\n${strengths.trim()}\n\nWEAKNESSES:\n${weaknesses.trim()}\n\nSUGGESTIONS FOR IMPROVEMENT:\n${suggestions.trim()}${generalFeedback.trim() ? `\n\nADDITIONAL COMMENTS:\n${generalFeedback.trim()}` : ''}`
-
-    const reviewData = {
-      reviewer: {
-        name: user.name,
-        email: user.email,
-        qualifications: user.qualifications,
-        workplace: user.workplace,
-      },
-      score: parseFloat(score),
-      feedback: combinedFeedback,
-      structuredFeedback: structuredFeedback,
-      createdAt: new Date().toISOString(),
-    }
-
-    submitReview(requestId, reviewData)
-    success(`Review submitted successfully for "${request.portfolioTitle}"! The portfolio owner will be notified.`)
-    navigate('/assigned-reviews')
   }
 
   if (!request) {

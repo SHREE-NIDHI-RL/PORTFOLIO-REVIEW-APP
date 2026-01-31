@@ -16,6 +16,7 @@ import PortfolioExploration from "./reviewer/PortfolioExploration"
 import FindReviewer from "./reviewer/FindReviewer"
 import ReviewerProfileView from "./reviewer/ReviewerProfileView"
 import ReviewerProfile from "./reviewer/ReviewerProfile"
+import ReviewerRequests from "./review/ReviewerRequests"
 import Home from "./pages/Home"
 import SubmitPortfolio from "./portfolio/SubmitPortfolio"
 import SavedPortfolios from "./portfolio/SavedPortfolios"
@@ -57,6 +58,7 @@ function App() {
           <Route path="/portfolio-versions" element={ <ProtectedRoute> <PortfolioVersions /></ProtectedRoute> }/>
           <Route path="/view-reviews" element={ <ProtectedRoute> <ViewReviews /></ProtectedRoute> }/>
           <Route path="/view-feedback" element={ <ProtectedRoute> <ViewFeedback /></ProtectedRoute> }/>
+          <Route path="/reviewer-requests" element={ <ProtectedRoute> <ReviewerRequests /></ProtectedRoute> }/>
           <Route path="/reviewer-profile" element={ <ProtectedRoute> <ReviewerProfile /></ProtectedRoute> }/>
           <Route path="/reviewer-profile/:reviewerEmail" element={ <ProtectedRoute> <ReviewerProfileView /></ProtectedRoute> }/>
         </Routes>

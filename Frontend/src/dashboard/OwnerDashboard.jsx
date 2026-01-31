@@ -1,40 +1,46 @@
-import { useContext, useState } from "react"
+import { useContext, useState, useEffect } from "react"
 import { AuthContext } from "../context/AuthContext"
 import { PortfolioContext } from "../context/PortfolioContext"
 import { Link } from "react-router-dom"
 import OwnerNavbar from "../components/OwnerNavbar"
-import UserProfile from "../components/UserProfile"
 import "../styles/OwnerDashboard.css"
 import "../styles/ReviewWorkflow.css"
 
 function OwnerDashboard() {
   const { user } = useContext(AuthContext)
-  const { portfolios, reviewRequests, addPost, posts } = useContext(PortfolioContext)
+  const { portfolios, reviewRequests, addPost, posts, loadCompletedReviews } = useContext(PortfolioContext)
   const [selectedReview, setSelectedReview] = useState(null)
+  const [completedReviews, setCompletedReviews] = useState([])
   
   const userPortfolios = portfolios.filter(p => p.owner === user?.email)
-  const completedReviews = reviewRequests.filter(req => 
-    req.ownerEmail === user?.email && req.status === "completed"
-  )
   const pendingRequests = reviewRequests.filter(req => 
     req.ownerEmail === user?.email && req.status === "pending"
   )
+  const userPosts = posts.filter(post => post.authorEmail === user?.email)
   const recentPosts = posts.slice(0, 3)
 
-  const handlePostReview = (review) => {
-    const postData = {
-      authorName: user.name,
-      authorEmail: user.email,
-      portfolioTitle: review.portfolioTitle,
-      portfolioContent: review.portfolioContent,
-      reviewerName: review.reviewerName,
-      reviewerEmail: review.reviewerEmail,
-      reviewScore: review.score,
-      reviewFeedback: review.feedback
+  // Load completed reviews on component mount
+  useEffect(() => {
+    const loadCompleted = async () => {
+      const completed = await loadCompletedReviews()
+      setCompletedReviews(completed)
     }
-    addPost(postData)
-    alert("Review posted successfully!")
-    setSelectedReview(null)
+    if (user?.role === 'owner') {
+      loadCompleted()
+    }
+  }, [user, loadCompletedReviews])
+
+  const handlePostReview = async (review) => {
+    try {
+      await addPost(review._id)
+      alert("Review posted successfully!")
+      setSelectedReview(null)
+      // Reload completed reviews to update posted status
+      const updated = await loadCompletedReviews()
+      setCompletedReviews(updated)
+    } catch (error) {
+      alert(error.message || "Error posting review")
+    }
   }
 
   const portfolios_display = userPortfolios.map((portfolio, index) => ({
@@ -51,7 +57,6 @@ function OwnerDashboard() {
   return (
     <>
       <OwnerNavbar />
-      <UserProfile />
       <div className="dashboard-with-navbar">
         <div className="owner-dashboard">
           <div className="dashboard-header">
@@ -145,7 +150,7 @@ function OwnerDashboard() {
               {completedReviews.length > 0 ? (
                 <div className="reviews-list">
                   {completedReviews.map(review => (
-                    <div key={review.id} className="review-item">
+                    <div key={review._id} className="review-item">
                       <div className="reviewer-avatar">
                         {review.reviewerName.charAt(0).toUpperCase()}
                       </div>
@@ -175,17 +180,29 @@ function OwnerDashboard() {
                               >
                                 View Feedback
                               </button>
-                              <button 
-                                onClick={() => handlePostReview(review)}
-                                className="auth-button"
-                                style={{ 
-                                  background: "#007bff", 
-                                  padding: "0.5rem 1rem", 
-                                  fontSize: "0.9rem" 
-                                }}
-                              >
-                                Post Review
-                              </button>
+                              {!review.isPosted && (
+                                <button 
+                                  onClick={() => handlePostReview(review)}
+                                  className="auth-button"
+                                  style={{ 
+                                    background: "#007bff", 
+                                    padding: "0.5rem 1rem", 
+                                    fontSize: "0.9rem" 
+                                  }}
+                                >
+                                  Post Review
+                                </button>
+                              )}
+                              {review.isPosted && (
+                                <span style={{ 
+                                  color: "#28a745", 
+                                  fontWeight: "bold",
+                                  padding: "0.5rem 1rem",
+                                  fontSize: "0.9rem"
+                                }}>
+                                  ✓ Posted
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -220,46 +237,70 @@ function OwnerDashboard() {
                     </div>
                     <div className="reviewer-profile-info">
                       <h3>{selectedReview.reviewerName}</h3>
-                      <p>Senior UX Designer • <span className="google-verified">✓ Google</span></p>
-                      <p>Credibility: <strong>4.8</strong></p>
+                      <p>Portfolio Reviewer</p>
+                      <p>Review Score: <strong>{selectedReview.score}/10</strong></p>
                     </div>
                   </div>
                   
-                  <div className="score-section">
-                    <div className="score-item">
-                      <span className="score-label">Visual Design:</span>
-                      <span className="score-value">{Math.floor(selectedReview.score * 0.9)}</span>
-                    </div>
-                    <div className="score-item">
-                      <span className="score-label">Usability:</span>
-                      <span className="score-value">{Math.floor(selectedReview.score * 0.8)}</span>
-                    </div>
-                    <div className="score-item">
-                      <span className="score-label">Content:</span>
-                      <span className="score-value">{Math.floor(selectedReview.score * 0.7)}</span>
-                    </div>
+                  <div style={{ marginBottom: "1.5rem" }}>
+                    <h4>Portfolio: {selectedReview.portfolioTitle}</h4>
+                    <p style={{ color: "#666", fontSize: "0.9rem" }}>
+                      Reviewed on {new Date(selectedReview.reviewDate).toLocaleDateString()}
+                    </p>
                   </div>
+
+                  {selectedReview.structuredFeedback ? (
+                    <div style={{ marginBottom: "1.5rem" }}>
+                      {selectedReview.structuredFeedback.strengths && (
+                        <div style={{ marginBottom: "1rem", padding: "1rem", background: "#e8f5e8", borderRadius: "8px" }}>
+                          <h4 style={{ margin: "0 0 0.5rem 0", color: "#28a745" }}>Strengths:</h4>
+                          <p style={{ margin: 0, lineHeight: "1.5" }}>{selectedReview.structuredFeedback.strengths}</p>
+                        </div>
+                      )}
+                      
+                      {selectedReview.structuredFeedback.weaknesses && (
+                        <div style={{ marginBottom: "1rem", padding: "1rem", background: "#fff3cd", borderRadius: "8px" }}>
+                          <h4 style={{ margin: "0 0 0.5rem 0", color: "#856404" }}>Areas for Improvement:</h4>
+                          <p style={{ margin: 0, lineHeight: "1.5" }}>{selectedReview.structuredFeedback.weaknesses}</p>
+                        </div>
+                      )}
+                      
+                      {selectedReview.structuredFeedback.suggestions && (
+                        <div style={{ marginBottom: "1rem", padding: "1rem", background: "#d1ecf1", borderRadius: "8px" }}>
+                          <h4 style={{ margin: "0 0 0.5rem 0", color: "#0c5460" }}>Suggestions:</h4>
+                          <p style={{ margin: 0, lineHeight: "1.5" }}>{selectedReview.structuredFeedback.suggestions}</p>
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
                   
-                  <ul className="feedback-list">
-                    <li>Great visual consistency and attention to detail.</li>
-                    <li>Usability is strong, but consider simplifying the navigation.</li>
-                    <li>Content is good, but could be more concise.</li>
-                  </ul>
-                  
-                  <div style={{ marginTop: "1.5rem", padding: "1rem", background: "#f8f9fa", borderRadius: "8px" }}>
-                    <h4>Full Feedback:</h4>
-                    <p style={{ margin: "0.5rem 0 0 0", fontSize: "0.9rem", lineHeight: "1.5" }}>
+                  <div style={{ marginBottom: "1.5rem", padding: "1rem", background: "#f8f9fa", borderRadius: "8px" }}>
+                    <h4 style={{ margin: "0 0 0.5rem 0" }}>Overall Feedback:</h4>
+                    <p style={{ margin: 0, fontSize: "0.9rem", lineHeight: "1.5" }}>
                       {selectedReview.feedback}
                     </p>
                   </div>
                   
-                  <div style={{ marginTop: "1.5rem", display: "flex", gap: "1rem" }}>
-                    <button 
-                      onClick={() => handlePostReview(selectedReview)}
-                      className="send-request-btn"
-                    >
-                      Post Review
-                    </button>
+                  <div style={{ display: "flex", gap: "1rem" }}>
+                    {!selectedReview.isPosted && (
+                      <button 
+                        onClick={() => handlePostReview(selectedReview)}
+                        className="send-request-btn"
+                      >
+                        Post Review to Community
+                      </button>
+                    )}
+                    {selectedReview.isPosted && (
+                      <span style={{ 
+                        color: "#28a745", 
+                        fontWeight: "bold",
+                        padding: "0.75rem 1.5rem",
+                        background: "#e8f5e8",
+                        borderRadius: "6px"
+                      }}>
+                        ✓ Posted to Community
+                      </span>
+                    )}
                     <button 
                       onClick={() => setSelectedReview(null)}
                       className="decline-btn"
@@ -274,13 +315,13 @@ function OwnerDashboard() {
 
             <section className="posts-section">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                <h2 className="section-title">Community Posts</h2>
+                <h2 className="section-title">Your Posts ({userPosts.length})</h2>
                 <Link to="/posts" className="auth-link">View All Posts</Link>
               </div>
-              {recentPosts.length > 0 ? (
+              {userPosts.length > 0 ? (
                 <div className="posts-preview">
-                  {recentPosts.map(post => (
-                    <div key={post.id} style={{ 
+                  {userPosts.slice(0, 3).map(post => (
+                    <div key={post._id} style={{ 
                       border: "1px solid #ddd", 
                       padding: "1rem", 
                       margin: "0.5rem 0", 
@@ -289,9 +330,9 @@ function OwnerDashboard() {
                     }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                         <div>
-                          <strong>Owner: {post.authorName}</strong>
+                          <strong>Your Portfolio</strong>
                           <span style={{ marginLeft: "1rem", color: "#666" }}>
-                            {new Date(post.postDate).toLocaleDateString()}
+                            {new Date(post.createdAt).toLocaleDateString()}
                           </span>
                         </div>
                         <span style={{ 

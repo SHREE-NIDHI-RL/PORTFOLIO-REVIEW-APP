@@ -82,6 +82,10 @@ class ApiService {
     return this.request('/portfolios/public');
   }
 
+  async getExplorePortfolios() {
+    return this.request('/portfolios/explore');
+  }
+
   async addPortfolioVersion(portfolioId, content) {
     return this.request(`/portfolios/${portfolioId}/versions`, {
       method: 'POST',
@@ -126,6 +130,25 @@ class ApiService {
     });
   }
 
+  async getCompletedReviews() {
+    return this.request('/reviews/completed');
+  }
+
+  async getReviewerHistory() {
+    return this.request('/reviews/reviewer-history');
+  }
+
+  async sendReviewerRequest(requestData) {
+    return this.request('/reviews/reviewer-request', {
+      method: 'POST',
+      body: JSON.stringify(requestData),
+    });
+  }
+
+  async getReviewerRequests() {
+    return this.request('/reviews/reviewer-requests');
+  }
+
   async createPost(reviewId) {
     return this.request(`/reviews/${reviewId}/post`, {
       method: 'POST',
@@ -143,6 +166,18 @@ class ApiService {
 
   async getPosts() {
     return this.request('/users/posts');
+  }
+
+  async likePost(postId) {
+    return this.request(`/users/posts/${postId}/like`, {
+      method: 'PATCH',
+    });
+  }
+
+  async commentPost(postId) {
+    return this.request(`/users/posts/${postId}/comment`, {
+      method: 'PATCH',
+    });
   }
 }
 

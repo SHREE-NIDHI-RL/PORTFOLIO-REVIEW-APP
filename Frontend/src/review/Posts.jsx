@@ -1,10 +1,10 @@
 import { useContext } from "react"
 import { PortfolioContext } from "../context/PortfolioContext"
 import { AuthContext } from "../context/AuthContext"
-import { Link } from "react-router-dom"
 import OwnerNavbar from "../components/OwnerNavbar"
 import ReviewerNavbar from "../components/ReviewerNavbar"
 import UserProfile from "../components/UserProfile"
+import PostCard from "../components/PostCard"
 import "../styles/Posts.css"
 
 function Posts() {
@@ -12,7 +12,9 @@ function Posts() {
   const { user } = useContext(AuthContext)
 
   const userPosts = posts.filter(post => post.authorEmail === user?.email)
-  const allPosts = posts.sort((a, b) => new Date(b.postDate || b.createdAt) - new Date(a.postDate || a.createdAt))
+  const otherPosts = posts.filter(post => post.authorEmail !== user?.email)
+  const sortedUserPosts = userPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+  const sortedOtherPosts = otherPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
 
   return (
     <div className="dashboard-with-navbar">
@@ -29,85 +31,42 @@ function Posts() {
             <h3>Your Posts</h3>
             <span className="stat-number">{userPosts.length}</span>
           </div>
+          <div className="stat-card">
+            <h3>Total Posts</h3>
+            <span className="stat-number">{posts.length}</span>
+          </div>
         </div>
 
-        {allPosts.length === 0 ? (
+        {posts.length === 0 ? (
           <div className="no-posts">
             <h3>No posts yet</h3>
             <p>Create posts by clicking the "Post" button on your portfolio reviews</p>
           </div>
         ) : (
           <div className="posts-feed">
-            {allPosts.map(post => (
-              <div key={post.id} className="post-card">
-                <div className="post-header">
-                  <div className="post-author">
-                    <div className="author-avatar">
-                      {post.authorName.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="author-info">
-                      <h4>{post.authorName}</h4>
-                      <span className="post-date">
-                        {new Date(post.postDate || post.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="review-score-badge">
-                    {post.reviewScore}/10
-                  </div>
+            {/* User's Posts Section */}
+            {sortedUserPosts.length > 0 && (
+              <>
+                <div className="section-header">
+                  <h2>Your Posts ({sortedUserPosts.length})</h2>
                 </div>
+                {sortedUserPosts.map(post => (
+                  <PostCard key={post._id} post={post} isUserPost={true} />
+                ))}
+              </>
+            )}
 
-                <div className="post-content">
-                  <h3 className="portfolio-title">Portfolio: {post.portfolioTitle}</h3>
-                  <p className="portfolio-description">
-                    {post.portfolioContent.substring(0, 200)}...
-                  </p>
-                  
-                  <div className="review-section">
-                    <div className="reviewer-info">
-                      <strong>Reviewed by: </strong>
-                      <Link 
-                        to={`/reviewer-profile/${post.reviewerEmail}`}
-                        style={{ 
-                          color: "#007bff", 
-                          textDecoration: "none", 
-                          fontWeight: "bold" 
-                        }}
-                        onMouseOver={(e) => e.target.style.textDecoration = "underline"}
-                        onMouseOut={(e) => e.target.style.textDecoration = "none"}
-                      >
-                        {post.reviewerName}
-                      </Link>
-                    </div>
-                    <div className="review-feedback">
-                      <p>"{post.reviewFeedback.substring(0, 150)}..."</p>
-                    </div>
-                  </div>
+            {/* Other Posts Section */}
+            {sortedOtherPosts.length > 0 && (
+              <>
+                <div className="section-header">
+                  <h2>Community Posts ({sortedOtherPosts.length})</h2>
                 </div>
-
-                <div className="post-footer">
-                  <div className="post-stats">
-                    <button className="stat-btn">
-                      ❤️ {post.likes} Likes
-                    </button>
-                    <button className="stat-btn">
-                      💬 {post.comments} Comments
-                    </button>
-                  </div>
-                  <div className="post-actions">
-                    <button className="action-btn like-btn">
-                      👍 Like
-                    </button>
-                    <button className="action-btn comment-btn">
-                      💬 Comment
-                    </button>
-                    <button className="action-btn share-btn">
-                      📤 Share
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+                {sortedOtherPosts.map(post => (
+                  <PostCard key={post._id} post={post} isUserPost={false} />
+                ))}
+              </>
+            )}
           </div>
         )}
       </div>

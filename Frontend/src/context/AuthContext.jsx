@@ -23,8 +23,10 @@ function AuthProvider({ children }) {
       setUser(response.user)
     } catch (error) {
       console.error('Error getting current user:', error)
+      // Clear invalid token
       localStorage.removeItem('token')
       apiService.setToken(null)
+      setUser(null)
     } finally {
       setLoading(false)
     }
@@ -34,6 +36,7 @@ function AuthProvider({ children }) {
     try {
       const response = await apiService.login({ email, password, role })
       apiService.setToken(response.token)
+      localStorage.setItem('token', response.token)
       setUser(response.user)
       return true
     } catch (error) {
@@ -46,6 +49,7 @@ function AuthProvider({ children }) {
     try {
       const response = await apiService.register(userData)
       apiService.setToken(response.token)
+      localStorage.setItem('token', response.token)
       setUser(response.user)
       return true
     } catch (error) {
@@ -55,7 +59,8 @@ function AuthProvider({ children }) {
   }
 
   const logout = () => {
-    localStorage.removeItem('token')
+    localStorage.clear()
+    sessionStorage.clear()
     apiService.setToken(null)
     setUser(null)
   }
@@ -68,7 +73,17 @@ function AuthProvider({ children }) {
       logout, 
       loading 
     }}>
-      {children}
+      {loading ? (
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          fontSize: '1.2rem'
+        }}>
+          Loading...
+        </div>
+      ) : children}
     </AuthContext.Provider>
   )
 }

@@ -28,7 +28,11 @@ function FindReviewer() {
     )
   }
 
-  const userPortfolios = (portfolios || []).filter(p => p.owner === user?.email)
+  const userPortfolios = (portfolios || []).filter(p => {
+    const userId = String(user?._id || user?.id)
+    const ownerId = String(p.owner?._id || p.owner)
+    return ownerId === userId
+  })
 
   const getReviewCount = (reviewerEmail) => {
     return (reviewRequests || []).filter(req => 
@@ -48,23 +52,24 @@ function FindReviewer() {
     )
   })
 
-  const handleRequestReview = () => {
+  const handleRequestReview = async () => {
     if (!selectedPortfolio) {
-      warning && warning("Please select a portfolio")
+      warning && warning("Please select a portfolio and version")
       return
     }
     
-    const portfolio = userPortfolios.find(p => p.title === selectedPortfolio)
+    const [portfolioId, versionNumber] = selectedPortfolio.split('|')
+    const portfolio = userPortfolios.find(p => p._id === portfolioId)
+    
     if (!portfolio || !sendReviewRequest) {
       warning && warning("Portfolio not found")
       return
     }
     
-    const success_result = sendReviewRequest(portfolio.id, selectedReviewer.email)
-    
-    if (success_result) {
-      success && success(`Review request sent to ${selectedReviewer.name} for "${portfolio.title}"!`)
-    } else {
+    try {
+      await sendReviewRequest(portfolioId, selectedReviewer.email, `Version ${versionNumber}`)
+      success && success(`Review request sent to ${selectedReviewer.name} for "${portfolio.title}" Version ${versionNumber}!`)
+    } catch (error) {
       warning && warning("Failed to send review request")
     }
     
@@ -224,18 +229,21 @@ function FindReviewer() {
               
               <div className="modal-content">
                 <div className="form-group">
-                  <label>Select Portfolio</label>
+                  <label>Select Portfolio & Version</label>
                   <select 
                     value={selectedPortfolio}
                     onChange={(e) => setSelectedPortfolio(e.target.value)}
                     className="form-select"
                   >
-                    <option value="">Choose portfolio...</option>
-                    {userPortfolios.map((portfolio) => (
-                      <option key={portfolio.id} value={portfolio.title}>
-                        {portfolio.title}
-                      </option>
-                    ))}
+                    <option value="">Choose portfolio and version...</option>
+                    {userPortfolios.map((portfolio) => {
+                      const versions = portfolio.versions || [{ version: 1, content: portfolio.content, createdAt: portfolio.createdAt }]
+                      return versions.map((version) => (
+                        <option key={`${portfolio._id}-v${version.version}`} value={`${portfolio._id}|${version.version}`}>
+                          📄 {portfolio.title} - Version {version.version} ({new Date(version.createdAt).toLocaleDateString()})
+                        </option>
+                      ))
+                    })}
                   </select>
                 </div>
                 

@@ -1,17 +1,30 @@
-import { useContext, useState } from "react"
+import { useContext, useState, useEffect } from "react"
 import { AuthContext } from "../context/AuthContext"
 import { PortfolioContext } from "../context/PortfolioContext"
 import ReviewerNavbar from "../components/ReviewerNavbar"
+import UserProfile from "../components/UserProfile"
 import "../styles/ReviewerDashboard.css"
 
 function ReviewHistory() {
   const { user } = useContext(AuthContext)
-  const { reviewRequests } = useContext(PortfolioContext)
+  const { loadReviewerHistory } = useContext(PortfolioContext)
   const [selectedReview, setSelectedReview] = useState(null)
+  const [allReviews, setAllReviews] = useState([])
+  const [loading, setLoading] = useState(true)
   
-  const completedReviews = reviewRequests.filter(req => 
-    req.reviewerEmail === user?.email && req.status === "completed"
-  ).sort((a, b) => new Date(b.reviewDate) - new Date(a.reviewDate))
+  useEffect(() => {
+    const fetchReviewHistory = async () => {
+      if (user?.role === 'reviewer') {
+        const reviews = await loadReviewerHistory()
+        setAllReviews(reviews)
+        setLoading(false)
+      }
+    }
+    fetchReviewHistory()
+  }, [user, loadReviewerHistory])
+
+  const completedReviews = allReviews.filter(review => review.status === 'completed')
+    .sort((a, b) => new Date(b.reviewDate) - new Date(a.reviewDate))
 
   const handleViewReview = (review) => {
     setSelectedReview(review)
@@ -23,9 +36,24 @@ function ReviewHistory() {
     return (total / completedReviews.length).toFixed(1)
   }
 
+  if (loading) {
+    return (
+      <div className="dashboard-with-navbar">
+        <ReviewerNavbar />
+        <UserProfile />
+        <div className="reviewer-dashboard">
+          <div className="dashboard-header">
+            <h1 className="dashboard-title">Loading Review History...</h1>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="dashboard-with-navbar">
       <ReviewerNavbar />
+      <UserProfile />
       <div className="reviewer-dashboard">
         <div className="dashboard-header">
           <h1 className="dashboard-title">Review History</h1>
@@ -53,11 +81,11 @@ function ReviewHistory() {
           </section>
 
           <section className="history-section">
-            <h2 className="section-title">Completed Reviews</h2>
+            <h2 className="section-title">Completed Reviews ({completedReviews.length})</h2>
             {completedReviews.length > 0 ? (
               <div className="history-list">
                 {completedReviews.map(review => (
-                  <div key={review.id} className="history-item">
+                  <div key={review._id} className="history-item">
                     <div className="reviewer-avatar">
                       {review.portfolioTitle.charAt(0).toUpperCase()}
                     </div>
@@ -141,28 +169,36 @@ function ReviewHistory() {
                     </div>
                   </div>
                   
+                  {/* Structured Feedback Display */}
+                  {selectedReview.structuredFeedback && (
+                    <div style={{ marginBottom: "1.5rem" }}>
+                      {selectedReview.structuredFeedback.strengths && (
+                        <div style={{ marginBottom: "1rem", padding: "1rem", background: "#e8f5e8", borderRadius: "8px" }}>
+                          <h4 style={{ margin: "0 0 0.5rem 0", color: "#28a745" }}>Strengths:</h4>
+                          <p style={{ margin: 0, lineHeight: "1.5" }}>{selectedReview.structuredFeedback.strengths}</p>
+                        </div>
+                      )}
+                      
+                      {selectedReview.structuredFeedback.weaknesses && (
+                        <div style={{ marginBottom: "1rem", padding: "1rem", background: "#fff3cd", borderRadius: "8px" }}>
+                          <h4 style={{ margin: "0 0 0.5rem 0", color: "#856404" }}>Areas for Improvement:</h4>
+                          <p style={{ margin: 0, lineHeight: "1.5" }}>{selectedReview.structuredFeedback.weaknesses}</p>
+                        </div>
+                      )}
+                      
+                      {selectedReview.structuredFeedback.suggestions && (
+                        <div style={{ marginBottom: "1rem", padding: "1rem", background: "#d1ecf1", borderRadius: "8px" }}>
+                          <h4 style={{ margin: "0 0 0.5rem 0", color: "#0c5460" }}>Suggestions:</h4>
+                          <p style={{ margin: 0, lineHeight: "1.5" }}>{selectedReview.structuredFeedback.suggestions}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
                   <div className="review-feedback-section">
-                    <h4>Review Feedback:</h4>
+                    <h4>Overall Feedback:</h4>
                     <div className="feedback-content">
                       {selectedReview.feedback || 'No feedback available'}
-                    </div>
-                  </div>
-
-                  <div className="review-breakdown">
-                    <h4>Score Breakdown:</h4>
-                    <div className="score-items">
-                      <div className="score-item">
-                        <span className="score-label">Visual Design:</span>
-                        <span className="score-value">{Math.floor(selectedReview.score * 0.9)}/10</span>
-                      </div>
-                      <div className="score-item">
-                        <span className="score-label">Usability:</span>
-                        <span className="score-value">{Math.floor(selectedReview.score * 0.8)}/10</span>
-                      </div>
-                      <div className="score-item">
-                        <span className="score-label">Content Quality:</span>
-                        <span className="score-value">{Math.floor(selectedReview.score * 0.7)}/10</span>
-                      </div>
                     </div>
                   </div>
                 </div>

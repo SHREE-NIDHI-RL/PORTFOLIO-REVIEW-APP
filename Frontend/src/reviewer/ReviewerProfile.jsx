@@ -33,16 +33,6 @@ function ReviewerProfile() {
               <div className="profile-info">
                 <h2>{user?.name}</h2>
                 <p className="profile-email">{user?.email}</p>
-                <div className="profile-stats">
-                  <div className="stat-item">
-                    <span className="stat-number">{myReviews.length}</span>
-                    <span className="stat-label">Reviews Completed</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-number">{avgScore}</span>
-                    <span className="stat-label">Avg Score Given</span>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -63,35 +53,6 @@ function ReviewerProfile() {
                     <span>{user?.skills || "Not specified"}</span>
                   </div>
                 </div>
-              </div>
-
-              <div className="detail-section">
-                <h3>Review History</h3>
-                {myReviews.length > 0 ? (
-                  <div className="review-history">
-                    {myReviews.slice(0, 5).map(review => (
-                      <div key={review.id} className="history-item">
-                        <div className="history-header">
-                          <h4>{review.portfolioTitle}</h4>
-                          <span className="score-badge">{review.score}/10</span>
-                        </div>
-                        <p className="history-meta">
-                          Owner: {review.ownerName} • {new Date(review.reviewDate).toLocaleDateString()}
-                        </p>
-                        <p className="history-feedback">
-                          {review.feedback?.substring(0, 100)}...
-                        </p>
-                      </div>
-                    ))}
-                    {myReviews.length > 5 && (
-                      <p className="view-more">And {myReviews.length - 5} more reviews...</p>
-                    )}
-                  </div>
-                ) : (
-                  <div className="empty-state">
-                    <p>No completed reviews yet</p>
-                  </div>
-                )}
               </div>
             </div>
           </div>

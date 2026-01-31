@@ -1,7 +1,8 @@
 .owner-dashboard {
-  background: #e5e7eb;
+  background: white;
   min-height: 100vh;
   padding: 2rem 2.5rem;
+  overflow-y: auto;
 }
 
 .dashboard-header {
@@ -9,6 +10,9 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  border-bottom: none;
+  border: none;
+  box-shadow: none;
 }
 
 .dashboard-title {
@@ -16,6 +20,9 @@
   font-weight: 600;
   color: #374151;
   margin: 0;
+  border-bottom: none;
+  text-decoration: none;
+  box-shadow: none;
 }
 
 .create-new-btn {
@@ -61,15 +68,18 @@
 }
 
 .portfolios-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
 }
 
 .portfolio-item {
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  min-height: 180px;
   overflow: hidden;
   transition: all 0.2s ease;
 }

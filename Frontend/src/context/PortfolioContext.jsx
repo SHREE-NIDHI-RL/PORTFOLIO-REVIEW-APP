@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, useContext } from "react"
+import { createContext, useState, useEffect, useContext, useCallback } from "react"
 import { AuthContext } from "./AuthContext"
 import apiService from "../services/api"
 
@@ -12,13 +12,9 @@ function PortfolioProvider({ children }) {
   const [reviewers, setReviewers] = useState([])
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    if (user) {
-      loadData()
-    }
-  }, [user])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
+    if (!user || loading) return
+    
     setLoading(true)
     try {
       await Promise.all([
@@ -32,19 +28,22 @@ function PortfolioProvider({ children }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user])
+
+  useEffect(() => {
+    if (user) {
+      loadData()
+    }
+  }, [user])
 
   const loadPortfolios = async () => {
     try {
-      if (user?.role === 'owner') {
-        const data = await apiService.getMyPortfolios()
-        setPortfolios(data)
-      } else {
-        const data = await apiService.getPublicPortfolios()
-        setPortfolios(data)
-      }
+      const data = await apiService.getMyPortfolios()
+      console.log('Loaded portfolios:', data)
+      setPortfolios(data)
     } catch (error) {
       console.error('Error loading portfolios:', error)
+      setPortfolios([])
     }
   }
 
@@ -62,6 +61,32 @@ function PortfolioProvider({ children }) {
     }
   }
 
+  const loadCompletedReviews = async () => {
+    try {
+      if (user?.role === 'owner') {
+        const data = await apiService.getCompletedReviews()
+        return data
+      }
+      return []
+    } catch (error) {
+      console.error('Error loading completed reviews:', error)
+      return []
+    }
+  }
+
+  const loadReviewerHistory = async () => {
+    try {
+      if (user?.role === 'reviewer') {
+        const data = await apiService.getReviewerHistory()
+        return data
+      }
+      return []
+    } catch (error) {
+      console.error('Error loading reviewer history:', error)
+      return []
+    }
+  }
+
   const loadPosts = async () => {
     try {
       const data = await apiService.getPosts()
@@ -74,16 +99,18 @@ function PortfolioProvider({ children }) {
   const loadReviewers = async () => {
     try {
       const data = await apiService.getReviewers()
+      console.log('Loaded reviewers:', data)
       setReviewers(data)
     } catch (error) {
       console.error('Error loading reviewers:', error)
+      setReviewers([])
     }
   }
 
   const addPortfolio = async (portfolioData) => {
     try {
       const newPortfolio = await apiService.createPortfolio(portfolioData)
-      setPortfolios([newPortfolio, ...portfolios])
+      setPortfolios(prev => [newPortfolio, ...prev])
       return newPortfolio
     } catch (error) {
       console.error('Error creating portfolio:', error)
@@ -94,7 +121,7 @@ function PortfolioProvider({ children }) {
   const addVersion = async (portfolioId, content) => {
     try {
       const updatedPortfolio = await apiService.addPortfolioVersion(portfolioId, content)
-      setPortfolios(portfolios.map(p => 
+      setPortfolios(prev => prev.map(p => 
         p._id === portfolioId ? updatedPortfolio : p
       ))
       return updatedPortfolio
@@ -111,12 +138,25 @@ function PortfolioProvider({ children }) {
         versionNumber, 
         isPublic
       )
-      setPortfolios(portfolios.map(p => 
+      setPortfolios(prev => prev.map(p => 
         p._id === portfolioId ? updatedPortfolio : p
       ))
       return updatedPortfolio
     } catch (error) {
       console.error('Error updating portfolio visibility:', error)
+      throw error
+    }
+  }
+
+  const sendReviewerRequest = async (portfolioId, message = "") => {
+    try {
+      const request = await apiService.sendReviewerRequest({
+        portfolioId,
+        message
+      })
+      return request
+    } catch (error) {
+      console.error('Error sending reviewer request:', error)
       throw error
     }
   }
@@ -128,7 +168,7 @@ function PortfolioProvider({ children }) {
         reviewerEmail,
         message
       })
-      setReviewRequests([request, ...reviewRequests])
+      setReviewRequests(prev => [request, ...prev])
       return request
     } catch (error) {
       console.error('Error sending review request:', error)
@@ -139,7 +179,7 @@ function PortfolioProvider({ children }) {
   const updateRequestStatus = async (requestId, status) => {
     try {
       const updatedRequest = await apiService.updateReviewStatus(requestId, status)
-      setReviewRequests(reviewRequests.map(req => 
+      setReviewRequests(prev => prev.map(req => 
         req._id === requestId ? updatedRequest : req
       ))
       return updatedRequest
@@ -152,7 +192,7 @@ function PortfolioProvider({ children }) {
   const submitReview = async (requestId, reviewData) => {
     try {
       const completedReview = await apiService.submitReview(requestId, reviewData)
-      setReviewRequests(reviewRequests.map(req => 
+      setReviewRequests(prev => prev.map(req => 
         req._id === requestId ? completedReview : req
       ))
       return completedReview
@@ -165,7 +205,9 @@ function PortfolioProvider({ children }) {
   const addPost = async (reviewId) => {
     try {
       const newPost = await apiService.createPost(reviewId)
-      setPosts([newPost, ...posts])
+      setPosts(prev => [newPost, ...prev])
+      // Reload review requests to update the posted status
+      await loadReviewRequests()
       return newPost
     } catch (error) {
       console.error('Error creating post:', error)
@@ -182,17 +224,21 @@ function PortfolioProvider({ children }) {
       portfolios, 
       reviewRequests,
       posts,
+      setPosts,
       reviewers,
       loading,
       addPortfolio, 
       addVersion, 
       updatePortfolioVisibility,
-      sendReviewRequest, 
+      sendReviewRequest,
+      sendReviewerRequest, 
       updateRequestStatus,
       submitReview,
       addPost,
       getReviewerByEmail,
-      loadData
+      loadData,
+      loadCompletedReviews,
+      loadReviewerHistory
     }}>
       {children}
     </PortfolioContext.Provider>

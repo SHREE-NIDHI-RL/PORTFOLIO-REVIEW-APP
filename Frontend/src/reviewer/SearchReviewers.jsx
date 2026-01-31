@@ -1,13 +1,17 @@
-import { useState, useContext } from "react"
+import { useState, useContext, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { PortfolioContext } from "../context/PortfolioContext"
 import OwnerNavbar from "../components/OwnerNavbar"
 import "../styles/SearchReviewers.css"
 
 function SearchReviewers() {
-  const { reviewers } = useContext(PortfolioContext)
+  const { reviewers, sendReviewRequest } = useContext(PortfolioContext)
   const [query, setQuery] = useState("")
   const [sentRequests, setSentRequests] = useState([])
+
+  useEffect(() => {
+    console.log('Reviewers loaded:', reviewers)
+  }, [reviewers])
 
   const filteredReviewers = reviewers.filter((r) =>
     r.qualifications.toLowerCase().includes(query.toLowerCase()) ||
@@ -15,9 +19,14 @@ function SearchReviewers() {
     r.workplace.toLowerCase().includes(query.toLowerCase())
   )
 
-  const sendRequest = (reviewerId) => {
-    setSentRequests([...sentRequests, reviewerId])
-    alert("Review request sent!")
+  const sendRequest = async (reviewerEmail) => {
+    try {
+      // For demo, we'll just mark as sent
+      setSentRequests([...sentRequests, reviewerEmail])
+      alert("Review request sent!")
+    } catch (error) {
+      alert("Error sending request: " + error.message)
+    }
   }
 
   return (

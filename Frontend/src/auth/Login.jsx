@@ -59,23 +59,16 @@ function Login() {
               <h1 className="brand-title">Portfolio Review Platform</h1>
             </div>
             <div className="auth-illustration">
-              <div className="illustration-container">
-                <div className="person person-1">
-                  <div className="person-body"></div>
-                  <div className="person-head"></div>
-                </div>
-                <div className="person person-2">
-                  <div className="person-body"></div>
-                  <div className="person-head"></div>
-                </div>
-                <div className="dashboard-mockup">
-                  <div className="dashboard-header"></div>
-                  <div className="dashboard-content">
-                    <div className="chart"></div>
-                    <div className="stats"></div>
-                  </div>
-                </div>
-              </div>
+              <img 
+                src="/login%20image.jpg" 
+                alt="Portfolio Review Platform" 
+                style={{
+                  width: "100%",
+                  height: "300px",
+                  objectFit: "cover",
+                  borderRadius: "12px"
+                }}
+              />
             </div>
           </div>
           <div className="auth-right">
@@ -119,23 +112,16 @@ function Login() {
             <h1 className="brand-title">Portfolio Review Platform</h1>
           </div>
           <div className="auth-illustration">
-            <div className="illustration-container">
-              <div className="person person-1">
-                <div className="person-body"></div>
-                <div className="person-head"></div>
-              </div>
-              <div className="person person-2">
-                <div className="person-body"></div>
-                <div className="person-head"></div>
-              </div>
-              <div className="dashboard-mockup">
-                <div className="dashboard-header"></div>
-                <div className="dashboard-content">
-                  <div className="chart"></div>
-                  <div className="stats"></div>
-                </div>
-              </div>
-            </div>
+            <img 
+              src="/login%20image.jpg" 
+              alt="Portfolio Review Platform" 
+              style={{
+                width: "100%",
+                height: "300px",
+                objectFit: "cover",
+                borderRadius: "12px"
+              }}
+            />
           </div>
           <h2 className="page-title">Sign in to your account</h2>
         </div>

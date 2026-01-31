@@ -44,10 +44,11 @@ function Register() {
         skills: role === "Reviewer" ? qualifications : undefined,
       }
       
-      await register(userData)
-      
-      setSuccess("Account created successfully! Redirecting to dashboard...")
-      setTimeout(() => navigate("/dashboard"), 2000)
+      const result = await register(userData)
+      if (result) {
+        setSuccess("Account created successfully! Redirecting to dashboard...")
+        setTimeout(() => navigate("/dashboard"), 2000)
+      }
     } catch (err) {
       setError(err.message)
     } finally {

@@ -1,9 +1,12 @@
-import { createContext, useState } from "react"
+import { createContext, useState, useEffect, useContext } from "react"
+import { AuthContext } from "./AuthContext"
 
 export const ReviewerContext = createContext()
 
 function ReviewerProvider({ children }) {
-  // Get default reviewers from AuthContext
+  const { token } = useContext(AuthContext) || {}
+  
+  // Keep the original hardcoded reviewers for UI
   const getDefaultReviewers = () => {
     const defaultUsers = [
       {
@@ -42,23 +45,29 @@ function ReviewerProvider({ children }) {
       skills: user.skills,
       workplace: user.workplace,
       qualifications: user.qualifications,
-      credibility: [95, 88, 92][index]
+      credibilityScore: [4.8, 4.6, 4.7][index]
     }))
   }
 
   const [reviewers, setReviewers] = useState(getDefaultReviewers())
+  const [loading, setLoading] = useState(false)
 
   const addReviewer = (reviewer) => {
     const newReviewer = {
       ...reviewer,
       id: Date.now(),
-      credibility: 50
+      credibilityScore: 4.5
     }
     setReviewers([...reviewers, newReviewer])
   }
 
+  const fetchReviewers = () => {
+    // Keep original reviewers, no need to fetch from API for UI
+    return reviewers
+  }
+
   return (
-    <ReviewerContext.Provider value={{ reviewers, addReviewer }}>
+    <ReviewerContext.Provider value={{ reviewers, addReviewer, loading, fetchReviewers }}>
       {children}
     </ReviewerContext.Provider>
   )
